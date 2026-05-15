@@ -10,42 +10,32 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
-import { springConfig, scalePress } from '@/constants/animations';
-import { useCustomers, useAddTransaction } from '@/storage/hooks';
+import { useCustomers, useAddTransaction, useEditTransaction } from '@/storage/hooks';
 import { scheduleDueDateReminder } from '@/utils/notifications';
+import { formatDate } from '@/storage/database';
+import { formatDateInput, parseDateInput } from '@/utils/formatters';
+import MaterialIcon from '@/components/MaterialIcon';
 
 type TransactionType = 'utang' | 'bayar';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-function formatDateInput(date: Date): string {
-  const d = date.getDate().toString().padStart(2, '0');
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const y = date.getFullYear();
-  return `${d}/${m}/${y}`;
-}
-
-function parseDateInput(text: string): Date | null {
-  const parts = text.split('/');
-  if (parts.length !== 3) return null;
-  const d = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10) - 1;
-  const y = parseInt(parts[2], 10);
-  const date = new Date(y, m, d);
-  if (isNaN(date.getTime())) return null;
-  if (date.getDate() !== d || date.getMonth() !== m || date.getFullYear() !== y) return null;
-  return date;
-}
-
 export default function TambahTransaksiScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ customerId?: string; type?: 'utang' | 'bayar' }>();
+  const params = useLocalSearchParams<{
+    customerId?: string;
+    type?: 'utang' | 'bayar';
+    editId?: string;
+    amount?: string;
+    description?: string;
+    date?: string;
+  }>();
   const { customers } = useCustomers();
   const { add, saving } = useAddTransaction();
+
+  const isEditing = !!params.editId;
+  const { edit: editTransaction } = useEditTransaction();
 
   const [txType, setTxType] = useState<TransactionType>(params.type || 'utang');
   const [selectedCustomerId, setSelectedCustomerId] = useState(params.customerId || '');
@@ -56,10 +46,10 @@ export default function TambahTransaksiScreen() {
     }
     return '';
   });
-  const [amountText, setAmountText] = useState('');
-  const [dateText, setDateText] = useState(formatDateInput(new Date()));
+  const [amountText, setAmountText] = useState(params.amount || '');
+  const [dateText, setDateText] = useState(params.date || formatDateInput(new Date()));
   const [dueDateText, setDueDateText] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(params.description || '');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -78,6 +68,15 @@ export default function TambahTransaksiScreen() {
     const amount = parseInt(amountText.replace(/\./g, ''), 10);
     const date = parseDateInput(dateText)!;
     const dueDate = txType === 'utang' && dueDateText ? parseDateInput(dueDateText) || undefined : undefined;
+
+    if (isEditing && params.editId) {
+      await editTransaction(params.editId, { amount, description, date: formatDate(date) });
+      Alert.alert('Berhasil', 'Transaksi berhasil diperbarui.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+      return;
+    }
+
     await add(selectedCustomerId, txType, amount, description, date, dueDate);
 
     if (txType === 'utang' && dueDate) {
@@ -110,7 +109,7 @@ export default function TambahTransaksiScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <MaterialIcon name="arrow-back" color={colors.primary} size={24} />
           </Pressable>
-          <Text style={styles.headerTitle}>Tambah Transaksi</Text>
+          <Text style={styles.headerTitle}>{isEditing ? 'Edit Transaksi' : 'Tambah Transaksi'}</Text>
         </View>
         <View style={styles.avatarSmall}>
           <MaterialIcon name="person" color={colors.primary} size={20} />
@@ -312,11 +311,6 @@ export default function TambahTransaksiScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size, style }: { name: any; color: string; size: number; style?: any }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} style={style} />;
 }
 
 const pickerStyles = StyleSheet.create({

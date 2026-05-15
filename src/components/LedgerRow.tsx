@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
 
 interface LedgerRowProps {
   date: string;

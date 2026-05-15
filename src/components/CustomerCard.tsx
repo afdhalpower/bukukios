@@ -5,7 +5,7 @@ import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import { springConfig } from '@/constants/animations';
 import Avatar from './Avatar';
 import StatusChip from './StatusChip';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
 
 interface CustomerCardProps {
   name: string;

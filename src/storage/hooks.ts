@@ -4,6 +4,7 @@ import {
   getCustomers,
   getCustomer,
   getCustomerTransactions,
+  getTransactions,
   saveTransaction,
   updateTransaction,
   deleteTransaction,
@@ -49,7 +50,7 @@ export function useTransactions() {
   const [data, setData] = useState<Transaction[]>([]);
 
   const refresh = useCallback(async () => {
-    const result = await getCustomerTransactions('');
+    const result = await getTransactions();
     setData(result);
   }, []);
 

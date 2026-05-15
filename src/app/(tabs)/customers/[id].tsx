@@ -12,7 +12,8 @@ import ReceiptView from '@/components/ReceiptView';
 import { springConfig, scalePress } from '@/constants/animations';
 import { useCustomerDetail } from '@/storage/hooks';
 import { useEditTransaction } from '@/storage/hooks';
-import { parseDateInput, formatRupiah } from '@/utils/dateParser';
+import { parseDateInput, formatRupiah } from '@/utils/formatters';
+import MaterialIcon from '@/components/MaterialIcon';
 
 function AnimatedButton({
   children,
@@ -27,6 +28,7 @@ function AnimatedButton({
 
   const tap = Gesture.Tap()
     .onBegin(() => { scale.value = withSpring(scalePress.pressed, springConfig); })
+    .onEnd(() => { if (onPress) onPress(); })
     .onFinalize(() => { scale.value = withSpring(scalePress.normal, springConfig); });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -35,7 +37,7 @@ function AnimatedButton({
 
   return (
     <GestureDetector gesture={tap}>
-      <Animated.View style={[style, animatedStyle]} onTouchEnd={onPress}>
+      <Animated.View style={[style, animatedStyle]}>
         {children}
       </Animated.View>
     </GestureDetector>
@@ -91,8 +93,21 @@ export default function CustomerDetailScreen() {
   }
 
   async function handleDeleteTransaction(txnId: string) {
-    await removeTransaction(txnId);
-    refresh();
+    Alert.alert(
+      'Hapus Transaksi',
+      'Yakin ingin menghapus transaksi ini? Tindakan ini tidak bisa dibatalkan.',
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus',
+          style: 'destructive',
+          onPress: async () => {
+            await removeTransaction(txnId);
+            refresh();
+          },
+        },
+      ],
+    );
   }
 
   function handleEditTransaction(txn: any) {
@@ -157,7 +172,7 @@ export default function CustomerDetailScreen() {
         </View>
         <View style={styles.headerActions}>
           <Pressable
-            onPress={() => router.push(`/(tabs)/customers/edit-pelanggan?id=${id}` as any)}
+            onPress={() => router.push({ pathname: '/(tabs)/customers/edit-pelanggan', params: { id } })}
             style={styles.headerIconButton}
           >
             <MaterialIcon name="edit" color={colors.primary} size={22} />
@@ -295,18 +310,10 @@ export default function CustomerDetailScreen() {
             </View>
           )}
 
-          <Pressable style={styles.loadMore}>
-            <Text style={styles.loadMoreLabel}>Tampilkan Lebih Banyak</Text>
-          </Pressable>
         </View>
       </ScrollView>
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size }: { name: any; color: string; size: number }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} />;
 }
 
 const styles = StyleSheet.create({

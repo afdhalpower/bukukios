@@ -4,7 +4,7 @@ import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import StatusChip from './StatusChip';
 import { isOverdue, daysUntilDue, formatDueDate } from '@/storage/database';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
 
 interface TransactionCardProps {
   type: 'utang' | 'bayar';

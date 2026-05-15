@@ -12,6 +12,8 @@ import {
 import { useRouter } from 'expo-router';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import { saveCustomer } from '@/storage/database';
+import { getInitials, getCurrentMonthYear } from '@/utils/formatters';
+import MaterialIcon from '@/components/MaterialIcon';
 
 export default function TambahPelangganScreen() {
   const router = useRouter();
@@ -30,20 +32,6 @@ export default function TambahPelangganScreen() {
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }
-
-  function getInitials(fullName: string): string {
-    const parts = fullName.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return fullName.substring(0, 2).toUpperCase();
-  }
-
-  function getCurrentMonthYear(): string {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const now = new Date();
-    return `${months[now.getMonth()]} ${now.getFullYear()}`;
   }
 
   async function handleSubmit() {
@@ -193,11 +181,6 @@ export default function TambahPelangganScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size, style }: { name: any; color: string; size: number; style?: any }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} style={style} />;
 }
 
 const styles = StyleSheet.create({

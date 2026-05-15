@@ -66,13 +66,21 @@ export default function SideMenu() {
     }
   }, [isOpen, slideAnim, backdropAnim]);
 
+  const [pendingRoute, setPendingRoute] = useState<MenuItem | null>(null);
+
+  useEffect(() => {
+    if (!isOpen && pendingRoute) {
+      const typedRoute = pendingRoute.route as any;
+      router.push(typedRoute);
+      setPendingRoute(null);
+    }
+  }, [isOpen, pendingRoute, router]);
+
   const currentSegment = segments[segments.length - 1];
 
   const handleNavigate = (item: MenuItem) => {
+    setPendingRoute(item);
     closeDrawer();
-    setTimeout(() => {
-      router.push(item.route as any);
-    }, 250);
   };
 
   if (!rendered && !isOpen) return null;

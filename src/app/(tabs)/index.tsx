@@ -11,7 +11,9 @@ import { useFocusEffect } from 'expo-router';
 import { useCustomers } from '@/storage/hooks';
 import { useTheme } from '@/context/ThemeContext';
 import { useDrawer } from '@/context/DrawerContext';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
+import MaterialIcon from '@/components/MaterialIcon';
+import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 
 export default function BerandaScreen() {
   const router = useRouter();
@@ -45,7 +47,7 @@ export default function BerandaScreen() {
           <Pressable onPress={toggleTheme} style={styles.themeToggle} accessibilityLabel={theme === 'light' ? 'Mode gelap' : 'Mode terang'}>
             <MaterialIcon name={theme === 'light' ? 'dark-mode' : 'light-mode'} color={hc} size={22} />
           </Pressable>
-          <Avatar initials="AS" size={40} source="https://lh3.googleusercontent.com/aida-public/AB6AXuDicdRsm2UeSmEeOp-aicmpVrdr5hMEAYyMqB41DA4NzvL2R5kC2F-8rx-xnfE65-GNBa4NjpVMr3es5F3c-8O_KsL7ZH6Q5oarbafVlRkROHkt-QsgkEHC7rei0L8d1p0haF4wHHvb2f2yy79g6HOHSjeO2AuA3iDO-RyPTm-3Ej0aBt2vBvr1Y2U032zsF9GmE0bJipeSdDYyOES-QMyGnIoYgOpE2oDz8L8TB8T5KQ7qGCAz1kf-f9iriXt3zrCY6AjvDRqGSQ" />
+          <Avatar initials="AS" size={40} source={DEFAULT_AVATAR_URL} />
         </View>
       </View>
 
@@ -114,11 +116,6 @@ export default function BerandaScreen() {
       <FAB onPress={() => { setIsAdding(true); router.push('/tambah-transaksi'); }} isOpen={isAdding} />
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size }: { name: any; color: string; size: number }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} />;
 }
 
 const styles = StyleSheet.create({

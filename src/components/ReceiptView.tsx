@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable, Share, Alert } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
 import { formatDueDate, isOverdue, daysUntilDue } from '@/storage/database';
 import type { Transaction, Customer } from '@/types';
 

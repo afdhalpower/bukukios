@@ -23,10 +23,6 @@ import { requestNotificationPermission } from '@/utils/notifications';
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style="dark" />
@@ -70,10 +66,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (ready) {
-      const timer = setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 500);
-      return () => clearTimeout(timer);
+      SplashScreen.hideAsync();
     }
   }, [ready]);
 

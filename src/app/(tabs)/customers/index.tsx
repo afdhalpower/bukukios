@@ -8,6 +8,8 @@ import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
 import FAB from '@/components/FAB';
 import { useDrawer } from '@/context/DrawerContext';
+import MaterialIcon from '@/components/MaterialIcon';
+import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 import { useCustomers } from '@/storage/hooks';
 
 export default function CustomerListScreen() {
@@ -30,7 +32,7 @@ export default function CustomerListScreen() {
           </Pressable>
           <BukuKiosLogo size={32} showText={false} color={colors.primary} accentColor={colors.secondary} />
         </View>
-        <Avatar initials="AS" size={40} source="https://lh3.googleusercontent.com/aida-public/AB6AXuDj1dEucV-szJbQ7tssvb-enoaXmNndFTJTWPyHmOfQV94G24gzB2Y7gB9e9mihGfJ28tdnmg94EEegeU1-0YHVncqujZBXrSmSpJVZyCEhNfWeRXnbXyUloKXJDzlHJiDS0EQzDklzQVxUP-gDWe3-y_2JXX7mAtX2UajC0dlNFLaLsbca5VSgRKOaOwzocdpTUI8NEggB8duCgJcLIatH5mPUWxGigUDtkK8gMHwr6GglOp0IeeKmO-rWd-iKnmbp36c1dCR1yw" />
+        <Avatar initials="AS" size={40} source={DEFAULT_AVATAR_URL} />
       </View>
 
       <ScrollView style={styles.scroll} refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}>
@@ -74,11 +76,6 @@ export default function CustomerListScreen() {
       <FAB onPress={() => router.push('/customers/tambah-pelanggan')} />
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size }: { name: any; color: string; size: number }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} />;
 }
 
 const styles = StyleSheet.create({

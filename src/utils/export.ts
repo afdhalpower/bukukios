@@ -1,5 +1,5 @@
 import { getCustomers, getTransactions } from '@/storage/database';
-import { formatRupiah } from '@/utils/dateParser';
+import { formatRupiah } from '@/utils/formatters';
 
 export interface BackupData {
   version: string;
@@ -22,7 +22,7 @@ export async function exportCSV(): Promise<string> {
   return csv;
 }
 
-export async function exportPDF(): Promise<string> {
+export async function exportTextReport(): Promise<string> {
   const customers = await getCustomers();
   const transactions = await getTransactions();
 

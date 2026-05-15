@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
@@ -9,13 +9,10 @@ import { useDrawer } from '@/context/DrawerContext';
 import { clearAllData, getCustomers, getTransactions } from '@/storage/database';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { exportCSV, exportPDF, backupJSON } from '@/utils/export';
+import { exportCSV, exportTextReport, backupJSON } from '@/utils/export';
 import { requestNotificationPermission, cancelAllNotifications, getScheduledNotifications } from '@/utils/notifications';
-
-function MaterialIcon({ name, color, size }: { name: any; color: string; size: number }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} />;
-}
+import MaterialIcon from '@/components/MaterialIcon';
+import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 
 interface SettingItemProps {
   icon: string;
@@ -96,12 +93,12 @@ export default function SettingsScreen() {
           <MaterialIcon name="menu" color={colors.primary} size={24} />
         </Pressable>
         <BukuKiosLogo size={32} showText={false} color={colors.primary} accentColor={colors.secondary} />
-        <Avatar initials="AS" size={40} source="https://lh3.googleusercontent.com/aida-public/AB6AXuDicdRsm2UeSmEeOp-aicmpVrdr5hMEAYyMqB41DA4NzvL2R5kC2F-8rx-xnfE65-GNBa4NjpVMr3es5F3c-8O_KsL7ZH6Q5oarbafVlRkROHkt-QsgkEHC7rei0L8d1p0haF4wHHvb2f2yy79g6HOHSjeO2AuA3iDO-RyPTm-3Ej0aBt2vBvr1Y2U032zsF9GmE0bJipeSdDYyOES-QMyGnIoYgOpE2oDz8L8TB8T5KQ7qGCAz1kf-f9iriXt3zrCY6AjvDRqGSQ" />
+        <Avatar initials="AS" size={40} source={DEFAULT_AVATAR_URL} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.profileSection}>
-          <Avatar initials="AS" size={72} source="https://lh3.googleusercontent.com/aida-public/AB6AXuDicdRsm2UeSmEeOp-aicmpVrdr5hMEAYyMqB41DA4NzvL2R5kC2F-8rx-xnfE65-GNBa4NjpVMr3es5F3c-8O_KsL7ZH6Q5oarbafVlRkROHkt-QsgkEHC7rei0L8d1p0haF4wHHvb2f2yy79g6HOHSjeO2AuA3iDO-RyPTm-3Ej0aBt2vBvr1Y2U032zsF9GmE0bJipeSdDYyOES-QMyGnIoYgOpE2oDz8L8TB8T5KQ7qGCAz1kf-f9iriXt3zrCY6AjvDRqGSQ" />
+          <Avatar initials="AS" size={72} source={DEFAULT_AVATAR_URL} />
           <Text style={[styles.profileName, { color: colors.onSurface }]}>Admin Toko</Text>
           <Text style={[styles.profileEmail, { color: colors.onSurfaceVariant }]}>admin@bukukios.id</Text>
         </View>
@@ -171,14 +168,14 @@ export default function SettingsScreen() {
             icon="help"
             title="Bantuan"
             subtitle="Panduan penggunaan & FAQ"
-            onPress={() => {}}
+            onPress={() => setShowAbout(true)}
           />
           <View style={[styles.divider, { backgroundColor: colors.outlineVariant + '4D' }]} />
           <SettingItem
             icon="star"
             title="Beri Penilaian"
             subtitle="Bantu kami berkembang"
-            onPress={() => {}}
+            onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=com.bukukios.app')}
           />
         </View>
 
@@ -200,7 +197,7 @@ export default function SettingsScreen() {
             catch { setShowNotifAlert(true); }
           }},
           { text: 'Export Laporan', icon: 'description', onPress: async () => {
-            try { const report = await exportPDF(); await Share.share({ message: report, title: 'bukukios-laporan.txt' }); }
+            try { const report = await exportTextReport(); await Share.share({ message: report, title: 'bukukios-laporan.txt' }); }
             catch { setShowNotifAlert(true); }
           }},
           { text: 'Backup JSON', icon: 'backup', onPress: async () => {

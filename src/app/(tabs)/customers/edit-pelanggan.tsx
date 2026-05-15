@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import { getCustomer, saveCustomer, deleteCustomer } from '@/storage/database';
 import type { Customer } from '@/types';
+import MaterialIcon from '@/components/MaterialIcon';
 
 export default function EditPelangganScreen() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function EditPelangganScreen() {
         setCustomer(c);
         setName(c.name);
         setPhone(c.phone);
-        setCategory(c.category as 'Grosir' | 'Eceran');
+        setCategory(c.category === 'Grosir' ? 'Grosir' : 'Eceran');
       }
       setLoading(false);
     }
@@ -94,7 +95,7 @@ export default function EditPelangganScreen() {
             const ok = await deleteCustomer(customer.id);
             if (ok) {
               Alert.alert('Berhasil', 'Pelanggan berhasil dihapus.', [
-                { text: 'OK', onPress: () => { router.back(); router.back(); } },
+                { text: 'OK', onPress: () => router.dismiss(2) },
               ]);
             } else {
               Alert.alert('Gagal', 'Tidak bisa menghapus pelanggan.');
@@ -227,11 +228,6 @@ export default function EditPelangganScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function MaterialIcon({ name, color, size, style }: { name: any; color: string; size: number; style?: any }) {
-  const MaterialIcons = require('@expo/vector-icons/MaterialIcons').default;
-  return <MaterialIcons name={name} size={size} color={color} style={style} />;
 }
 
 const styles = StyleSheet.create({

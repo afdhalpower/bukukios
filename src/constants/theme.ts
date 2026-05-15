@@ -141,3 +141,6 @@ export const typography = {
     fontWeight: '700' as const,
   },
 };
+
+export const DEFAULT_AVATAR_URL =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDicdRsm2UeSmEeOp-aicmpVrdr5hMEAYyMqB41DA4NzvL2R5kC2F-8rx-xnfE65-GNBa4NjpVMr3es5F3c-8O_KsL7ZH6Q5oarbafVlRkROHkt-QsgkEHC7rei0L8d1p0haF4wHHvb2f2yy79g6HOHSjeO2AuA3iDO-RyPTm-3Ej0aBt2vBvr1Y2U032zsF9GmE0bJipeSdDYyOES-QMyGnIoYgOpE2oDz8L8TB8T5KQ7qGCAz1kf-f9iriXt3zrCY6AjvDRqGSQ';
