@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { memo } from 'react';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -20,7 +21,7 @@ interface TransactionCardProps {
   onDelete?: () => void;
 }
 
-export default function TransactionCard({
+function TransactionCard({
   type,
   description,
   amount,
@@ -126,6 +127,8 @@ export default function TransactionCard({
     </Animated.View>
   );
 }
+
+export default memo(TransactionCard);
 
 const styles = StyleSheet.create({
   card: {

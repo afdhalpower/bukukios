@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -14,6 +14,7 @@ import { useCustomerDetail } from '@/storage/hooks';
 import { useEditTransaction } from '@/storage/hooks';
 import { parseDateInput, formatRupiah } from '@/utils/formatters';
 import MaterialIcon from '@/components/MaterialIcon';
+import ActionSheet from '@/components/ActionSheet';
 
 function AnimatedButton({
   children,
@@ -53,6 +54,8 @@ export default function CustomerDetailScreen() {
   const [filterDays, setFilterDays] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'transaksi' | 'ledger'>('transaksi');
   const [selectedTxn, setSelectedTxn] = useState<any>(null);
+  const [displayCount, setDisplayCount] = useState(20);
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -76,21 +79,25 @@ export default function CustomerDetailScreen() {
     return true;
   });
 
+  useEffect(() => {
+    setDisplayCount(20);
+  }, [filterType, filterDays]);
+
+  const visibleTxns = filteredTxns.slice(0, displayCount);
+
   function showFilterDialog() {
-    Alert.alert(
-      'Filter Transaksi',
-      'Pilih filter:',
-      [
-        { text: 'Semua', onPress: () => { setFilterType('semua'); setFilterDays(null); } },
-        { text: 'Utang saja', onPress: () => setFilterType('utang') },
-        { text: 'Bayar saja', onPress: () => setFilterType('bayar') },
-        { text: '7 hari terakhir', onPress: () => setFilterDays(7) },
-        { text: '30 hari terakhir', onPress: () => setFilterDays(30) },
-        { text: '3 bulan terakhir', onPress: () => setFilterDays(90) },
-        { text: 'Reset Filter', onPress: () => { setFilterType('semua'); setFilterDays(null); }, style: 'cancel' },
-      ],
-    );
+    setShowFilterSheet(true);
   }
+
+  const filterActions = [
+    { text: 'Semua', onPress: () => { setFilterType('semua'); setFilterDays(null); } },
+    { text: 'Utang saja', onPress: () => setFilterType('utang') },
+    { text: 'Bayar saja', onPress: () => setFilterType('bayar') },
+    { text: '7 hari terakhir', onPress: () => setFilterDays(7) },
+    { text: '30 hari terakhir', onPress: () => setFilterDays(30) },
+    { text: '3 bulan terakhir', onPress: () => setFilterDays(90) },
+    { text: 'Reset Filter', onPress: () => { setFilterType('semua'); setFilterDays(null); }, style: 'cancel' as const },
+  ];
 
   async function handleDeleteTransaction(txnId: string) {
     Alert.alert(
@@ -265,7 +272,7 @@ export default function CustomerDetailScreen() {
                   </Text>
                 </View>
               ) : (
-                filteredTxns.map((txn, index) => (
+                visibleTxns.map((txn, index) => (
                   <TransactionCard
                     key={txn.id}
                     type={txn.type}
@@ -281,6 +288,14 @@ export default function CustomerDetailScreen() {
                     onDelete={() => handleDeleteTransaction(txn.id)}
                   />
                 ))
+              )}
+              {displayCount < filteredTxns.length && (
+                <Pressable
+                  style={styles.loadMore}
+                  onPress={() => setDisplayCount(prev => prev + 50)}
+                >
+                  <Text style={styles.loadMoreLabel}>Tampilkan Lebih Banyak</Text>
+                </Pressable>
               )}
             </View>
           ) : (
@@ -312,6 +327,14 @@ export default function CustomerDetailScreen() {
 
         </View>
       </ScrollView>
+
+      <ActionSheet
+        visible={showFilterSheet}
+        title="Filter Transaksi"
+        message="Pilih filter:"
+        actions={filterActions}
+        onClose={() => setShowFilterSheet(false)}
+      />
     </View>
   );
 }

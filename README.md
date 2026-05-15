@@ -21,6 +21,7 @@ Aplikasi pencatatan keuangan UMKM berbasis React Native (Expo) untuk mengelola p
 - Field **jatuh tempo** (opsional) untuk utang
 - Badge **OVERDUE** pada transaksi yang melewati jatuh tempo
 - Filter transaksi: berdasarkan jenis (utang/bayar) dan rentang waktu
+- Pagination riwayat transaksi — tombol "Tampilkan Lebih Banyak"
 
 ### Dashboard & Laporan
 - Ringkasan total piutang dan jumlah pelanggan perlu ditagih
@@ -48,11 +49,13 @@ Aplikasi pencatatan keuangan UMKM berbasis React Native (Expo) untuk mengelola p
 
 ### Tampilan
 - **Mode gelap** (dark mode)
-- **Drawer navigasi** — slide-out menu dari ikon hamburger di pojok kiri
-- **ActionSheet** — bottom sheet modal interaktif (kelola data, reset, konfirmasi)
-- **About modal** — info aplikasi dengan detail versi, developer, tech stack
+- **Drawer navigasi** — slide-out menu dari ikon hamburger
+- **ActionSheet** — bottom sheet interaktif (filter, kelola data, reset, konfirmasi)
+- **About modal** — info aplikasi dengan versi, developer, tech stack
+- **Help modal** — FAQ interaktif dengan panduan penggunaan aplikasi
+- Link rating otomatis: Play Store (Android) / App Store (iOS)
 - Animasi halus dengan Reanimated
-- Desain profesional dengan palet teal-navy + forest green
+- Palet teal-navy + forest green
 
 ## Tech Stack
 
@@ -87,8 +90,9 @@ bukukios/
 │   │   └── tambah-transaksi.tsx      # Modal form transaksi
 │   ├── components/                   # UI components
 │   │   ├── SideMenu.tsx             # Slide-out drawer navigasi
-│   │   ├── ActionSheet.tsx          # Bottom sheet modal (ganti Alert)
+│   │   ├── ActionSheet.tsx          # Bottom sheet interaktif
 │   │   ├── AboutModal.tsx           # Info aplikasi
+│   │   ├── HelpModal.tsx            # FAQ & panduan
 │   ├── constants/                    # Theme, animations
 │   ├── context/                      # ThemeContext, DrawerContext
 │   ├── data/                         # Seed data

@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking, Platform, Alert } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
 import ActionSheet from '@/components/ActionSheet';
 import AboutModal from '@/components/AboutModal';
+import HelpModal from '@/components/HelpModal';
 import { useTheme } from '@/context/ThemeContext';
 import { useDrawer } from '@/context/DrawerContext';
 import { clearAllData, getCustomers, getTransactions } from '@/storage/database';
@@ -63,6 +64,7 @@ export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showKelola, setShowKelola] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -168,14 +170,25 @@ export default function SettingsScreen() {
             icon="help"
             title="Bantuan"
             subtitle="Panduan penggunaan & FAQ"
-            onPress={() => setShowAbout(true)}
+            onPress={() => setShowHelp(true)}
           />
           <View style={[styles.divider, { backgroundColor: colors.outlineVariant + '4D' }]} />
           <SettingItem
             icon="star"
             title="Beri Penilaian"
             subtitle="Bantu kami berkembang"
-            onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=com.bukukios.app')}
+            onPress={() => {
+              const url = Platform.select({
+                android: 'https://play.google.com/store/apps/details?id=com.bukukios.app',
+                ios: 'https://apps.apple.com/app/id123456789',
+                web: '',
+              });
+              if (url) {
+                Linking.openURL(url).catch(() => Alert.alert('Gagal', 'Tidak dapat membuka toko aplikasi'));
+              } else {
+                Alert.alert('Fitur Mobile', 'Beri penilaian tersedia di aplikasi Android atau iOS');
+              }
+            }}
           />
         </View>
 
@@ -246,6 +259,11 @@ export default function SettingsScreen() {
       <AboutModal
         visible={showAbout}
         onClose={() => setShowAbout(false)}
+      />
+
+      <HelpModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
       />
     </View>
   );
