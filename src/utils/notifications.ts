@@ -69,6 +69,16 @@ export async function scheduleDueDateReminder(
   return reminderId;
 }
 
+export async function cancelNotificationByTransactionId(transactionId: string): Promise<void> {
+  if (isWeb) return;
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  for (const notification of scheduled) {
+    if (notification.content.data?.transactionId === transactionId) {
+      await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+    }
+  }
+}
+
 export async function cancelAllNotifications(): Promise<void> {
   if (isWeb) return;
   await Notifications.cancelAllScheduledNotificationsAsync();

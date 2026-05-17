@@ -13,6 +13,7 @@ import { springConfig, scalePress } from '@/constants/animations';
 import { useCustomerDetail } from '@/storage/hooks';
 import { useEditTransaction } from '@/storage/hooks';
 import { parseDateInput, parseDateString, formatRupiah } from '@/utils/formatters';
+import { cancelNotificationByTransactionId } from '@/utils/notifications';
 import MaterialIcon from '@/components/MaterialIcon';
 import ActionSheet from '@/components/ActionSheet';
 
@@ -104,6 +105,7 @@ export default function CustomerDetailScreen() {
           text: 'Hapus',
           style: 'destructive',
           onPress: async () => {
+            await cancelNotificationByTransactionId(txnId);
             await removeTransaction(txnId);
             refresh();
           },

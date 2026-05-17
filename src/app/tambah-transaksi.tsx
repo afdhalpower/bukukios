@@ -14,7 +14,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import { useCustomers, useAddTransaction, useEditTransaction } from '@/storage/hooks';
-import { scheduleDueDateReminder } from '@/utils/notifications';
+import { scheduleDueDateReminder, cancelNotificationByTransactionId } from '@/utils/notifications';
 import { formatDate } from '@/storage/database';
 import { formatDateInput, parseDateInput } from '@/utils/formatters';
 import MaterialIcon from '@/components/MaterialIcon';
@@ -70,7 +70,14 @@ export default function TambahTransaksiScreen() {
     const dueDate = txType === 'utang' && dueDateText ? parseDateInput(dueDateText) || undefined : undefined;
 
     if (isEditing && params.editId) {
+      await cancelNotificationByTransactionId(params.editId);
       await editTransaction(params.editId, { amount, description, date: formatDate(date) });
+      if (txType === 'utang' && dueDate) {
+        const customer = customers.find((c) => c.id === selectedCustomerId);
+        if (customer) {
+          await scheduleDueDateReminder(params.editId, customer.name, amount, dueDate);
+        }
+      }
       Alert.alert('Berhasil', 'Transaksi berhasil diperbarui.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
