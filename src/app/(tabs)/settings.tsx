@@ -7,7 +7,8 @@ import AboutModal from '@/components/AboutModal';
 import HelpModal from '@/components/HelpModal';
 import { useTheme } from '@/context/ThemeContext';
 import { useDrawer } from '@/context/DrawerContext';
-import { clearAllData, getCustomers, getTransactions } from '@/storage/database';
+import { clearAllData, getCustomers, getTransactions, getProfile, saveProfile } from '@/storage/database';
+import type { Profile } from '@/storage/database';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { exportCSV, exportTextReport, backupJSON, importFromJSON } from '@/utils/export';
@@ -68,6 +69,17 @@ export default function SettingsScreen() {
   const [showRestore, setShowRestore] = useState(false);
   const [restoreJson, setRestoreJson] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
+  const [profile, setProfile] = useState<Profile>({ name: 'Admin Toko', email: 'admin@bukukios.id', initials: 'AS' });
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const p = await getProfile();
+      setProfile(p);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -103,9 +115,16 @@ export default function SettingsScreen() {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.profileSection}>
-          <Avatar initials="AS" size={72} source={DEFAULT_AVATAR_URL} />
-          <Text style={[styles.profileName, { color: colors.onSurface }]}>Admin Toko</Text>
-          <Text style={[styles.profileEmail, { color: colors.onSurfaceVariant }]}>admin@bukukios.id</Text>
+          <Avatar initials={profile.initials} size={72} source={profile.avatarUrl || DEFAULT_AVATAR_URL} />
+          <Text style={[styles.profileName, { color: colors.onSurface }]}>{profile.name}</Text>
+          <Text style={[styles.profileEmail, { color: colors.onSurfaceVariant }]}>{profile.email}</Text>
+          <Pressable
+            style={styles.editProfileButton}
+            onPress={() => { setEditName(profile.name); setEditEmail(profile.email); setShowEditProfile(true); }}
+          >
+            <MaterialIcon name="edit" color={colors.primary} size={16} />
+            <Text style={styles.editProfileLabel}>Edit Profil</Text>
+          </Pressable>
         </View>
 
         <SectionHeader title="Tampilan" />
@@ -270,6 +289,46 @@ export default function SettingsScreen() {
         onClose={() => setShowHelp(false)}
       />
 
+      <Modal visible={showEditProfile} animationType="slide" transparent={false} onRequestClose={() => setShowEditProfile(false)}>
+        <View style={styles.restoreContainer}>
+          <View style={styles.restoreHeader}>
+            <Text style={styles.restoreTitle}>Edit Profil</Text>
+            <Pressable onPress={() => setShowEditProfile(false)}>
+              <MaterialIcon name="close" color={colors.onSurfaceVariant} size={24} />
+            </Pressable>
+          </View>
+          <Text style={styles.restoreInfo}>Nama Toko</Text>
+          <TextInput
+            style={styles.profileInput}
+            placeholder="Nama"
+            placeholderTextColor={colors.outline}
+            value={editName}
+            onChangeText={setEditName}
+          />
+          <Text style={[styles.restoreInfo, { marginTop: spacing.stackMd }]}>Email</Text>
+          <TextInput
+            style={styles.profileInput}
+            placeholder="Email"
+            placeholderTextColor={colors.outline}
+            value={editEmail}
+            onChangeText={setEditEmail}
+            keyboardType="email-address"
+          />
+          <Pressable
+            style={[styles.restoreButton, { backgroundColor: colors.primary, marginTop: spacing.stackLg }]}
+            onPress={async () => {
+              const initials = editName.trim().split(' ').map(s => s[0]).join('').toUpperCase().slice(0, 2) || 'AS';
+              const updated: Profile = { name: editName.trim(), email: editEmail.trim(), initials };
+              await saveProfile(updated);
+              setProfile(updated);
+              setShowEditProfile(false);
+            }}
+          >
+            <Text style={styles.restoreButtonLabel}>Simpan</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
       <Modal visible={showRestore} animationType="slide" transparent={false} onRequestClose={() => setShowRestore(false)}>
         <View style={styles.restoreContainer}>
           <View style={styles.restoreHeader}>
@@ -382,5 +441,18 @@ const styles = StyleSheet.create({
   },
   restoreButtonLabel: {
     ...typography.headlineMd, color: colors.onPrimary,
+  },
+  editProfileButton: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.base,
+    marginTop: spacing.stackSm, paddingVertical: spacing.base, paddingHorizontal: spacing.stackMd,
+    borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.outlineVariant,
+  },
+  editProfileLabel: {
+    ...typography.labelBold, color: colors.primary,
+  },
+  profileInput: {
+    borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
+    padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
+    backgroundColor: colors.surfaceContainerLowest,
   },
 });

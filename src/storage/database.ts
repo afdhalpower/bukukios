@@ -5,7 +5,26 @@ const KEYS = {
   customers: '@bukukios/customers',
   transactions: '@bukukios/transactions',
   initialized: '@bukukios/initialized',
+  profile: '@bukukios/profile',
 };
+
+export interface Profile {
+  name: string;
+  email: string;
+  initials: string;
+  avatarUrl?: string;
+}
+
+const DEFAULT_PROFILE: Profile = { name: 'Admin Toko', email: 'admin@bukukios.id', initials: 'AS' };
+
+export async function getProfile(): Promise<Profile> {
+  const raw = await AsyncStorage.getItem(KEYS.profile);
+  return raw ? JSON.parse(raw) : DEFAULT_PROFILE;
+}
+
+export async function saveProfile(profile: Profile): Promise<void> {
+  await AsyncStorage.setItem(KEYS.profile, JSON.stringify(profile));
+}
 
 const SEED_CUSTOMERS: Customer[] = [
   { id: '1', name: 'Ahmad Hidayat', phone: '0812-3456-7890', initials: 'AH', totalDebt: 1250000, status: 'aktif', category: 'Grosir', since: 'Jan 2023' },
