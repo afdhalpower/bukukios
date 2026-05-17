@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Share } from 'react-native';
 import { spacing, borderRadius, typography } from '@/constants/theme';
 import { useColors } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
@@ -13,6 +13,8 @@ import { useFocusEffect } from 'expo-router';
 import { Transaction } from '@/types';
 import { formatRupiah } from '@/utils/formatters';
 import MaterialIcon from '@/components/MaterialIcon';
+import ActionSheet from '@/components/ActionSheet';
+import { exportCSV, exportTextReport } from '@/utils/export';
 import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 
 function monthLabel(dateStr: string): string {
@@ -30,6 +32,7 @@ export default function ReportsScreen() {
   const { openDrawer } = useDrawer();
   const { customers } = useCustomers();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [showExportSheet, setShowExportSheet] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,6 +64,20 @@ export default function ReportsScreen() {
   const sortedMonths = Object.entries(monthlyMap)
     .sort(([a], [b]) => (MONTH_ORDER[a] || 0) - (MONTH_ORDER[b] || 0));
   const chartData = sortedMonths.map(([label, value]) => ({ label, value }));
+
+  async function handleExportCsv() {
+    try {
+      const csv = await exportCSV();
+      await Share.share({ message: csv, title: 'bukukios-laporan.csv' });
+    } catch {}
+  }
+
+  async function handleExportLaporan() {
+    try {
+      const report = await exportTextReport();
+      await Share.share({ message: report, title: 'bukukios-laporan.txt' });
+    } catch {}
+  }
 
   const styles = useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -100,7 +117,7 @@ export default function ReportsScreen() {
   }), [colors]);
 
   return (
-    <ScrollView style={styles.container}>
+    <><ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Pressable onPress={openDrawer}>
@@ -108,7 +125,12 @@ export default function ReportsScreen() {
           </Pressable>
           <BukuKiosLogo size={32} showText={false} color={colors.primary} accentColor={colors.secondary} />
         </View>
-        <Avatar initials="AS" size={40} source={DEFAULT_AVATAR_URL} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.stackSm }}>
+          <Pressable onPress={() => setShowExportSheet(true)}>
+            <MaterialIcon name="ios-share" color={colors.primary} size={24} />
+          </Pressable>
+          <Avatar initials="AS" size={40} source={DEFAULT_AVATAR_URL} />
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -158,6 +180,17 @@ export default function ReportsScreen() {
         )}
       </View>
     </ScrollView>
-  );
 
+    <ActionSheet
+      visible={showExportSheet}
+      title="Ekspor Laporan"
+      message="Pilih format:"
+      actions={[
+        { text: 'CSV (Excel)', icon: 'table-chart', onPress: handleExportCsv },
+        { text: 'Laporan Teks', icon: 'description', onPress: handleExportLaporan },
+        { text: 'Batal', style: 'cancel' as const },
+      ]}
+      onClose={() => setShowExportSheet(false)}
+    />
+  </>);
 }
