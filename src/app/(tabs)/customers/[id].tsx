@@ -1,5 +1,5 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert, Modal } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
@@ -286,6 +286,7 @@ export default function CustomerDetailScreen() {
                     dueDate={txn.dueDate}
                     onEdit={() => handleEditTransaction(txn)}
                     onDelete={() => handleDeleteTransaction(txn.id)}
+                    onReceipt={() => handleViewReceipt(txn)}
                   />
                 ))
               )}
@@ -335,6 +336,12 @@ export default function CustomerDetailScreen() {
         actions={filterActions}
         onClose={() => setShowFilterSheet(false)}
       />
+
+      <Modal visible={!!selectedTxn} animationType="slide" transparent={false} onRequestClose={() => setSelectedTxn(null)}>
+        {selectedTxn && (
+          <ReceiptView transaction={selectedTxn} customer={customer} onClose={() => setSelectedTxn(null)} />
+        )}
+      </Modal>
     </View>
   );
 }

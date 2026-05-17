@@ -7,9 +7,10 @@ import type { Transaction, Customer } from '@/types';
 interface ReceiptViewProps {
   transaction: Transaction;
   customer: Customer;
+  onClose?: () => void;
 }
 
-export default function ReceiptView({ transaction, customer }: ReceiptViewProps) {
+export default function ReceiptView({ transaction, customer, onClose }: ReceiptViewProps) {
   async function handleShare() {
     try {
       const text = generateReceiptText();
@@ -54,6 +55,11 @@ export default function ReceiptView({ transaction, customer }: ReceiptViewProps)
     <View style={styles.container}>
       <View style={styles.receipt}>
         <View style={styles.header}>
+          {onClose && (
+            <Pressable onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeIcon}>&times;</Text>
+            </Pressable>
+          )}
           <Text style={styles.logoText}>BukuKios</Text>
           <Text style={styles.invoiceNumber}>{transaction.invoice || 'BUKTI PEMBAYARAN'}</Text>
         </View>
@@ -251,5 +257,22 @@ const styles = StyleSheet.create({
   actionLabel: {
     ...typography.labelBold,
     color: colors.onPrimary,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  closeIcon: {
+    fontSize: 22,
+    color: colors.onSurfaceVariant,
+    lineHeight: 24,
   },
 });

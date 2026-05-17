@@ -19,6 +19,7 @@ interface TransactionCardProps {
   dueDate?: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  onReceipt?: () => void;
 }
 
 function TransactionCard({
@@ -33,6 +34,7 @@ function TransactionCard({
   dueDate,
   onEdit,
   onDelete,
+  onReceipt,
 }: TransactionCardProps) {
   const isDebt = type === 'utang';
   const iconColor = isDebt ? colors.error : colors.onSecondaryContainer;
@@ -53,6 +55,9 @@ function TransactionCard({
             const buttons: any[] = [
               { text: 'Batal', style: 'cancel' as const },
             ];
+            if (onReceipt) {
+              buttons.splice(1, 0, { text: 'Struk', onPress: onReceipt });
+            }
             if (onEdit) {
               buttons.splice(1, 0, { text: 'Edit', onPress: onEdit });
             }
