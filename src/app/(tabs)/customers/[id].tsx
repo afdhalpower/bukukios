@@ -12,7 +12,7 @@ import ReceiptView from '@/components/ReceiptView';
 import { springConfig, scalePress } from '@/constants/animations';
 import { useCustomerDetail } from '@/storage/hooks';
 import { useEditTransaction } from '@/storage/hooks';
-import { parseDateInput, formatRupiah } from '@/utils/formatters';
+import { parseDateInput, parseDateString, formatRupiah } from '@/utils/formatters';
 import MaterialIcon from '@/components/MaterialIcon';
 import ActionSheet from '@/components/ActionSheet';
 
@@ -68,12 +68,7 @@ export default function CustomerDetailScreen() {
     if (filterDays) {
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - filterDays);
-      const parts = txn.date.split(' ');
-      const day = parseInt(parts[0], 10);
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const month = monthNames.indexOf(parts[1]);
-      const year = parseInt(parts[2], 10);
-      const txnDate = new Date(year, month, day);
+      const txnDate = parseDateString(txn.date);
       if (txnDate < cutoff) return false;
     }
     return true;
@@ -133,15 +128,7 @@ export default function CustomerDetailScreen() {
 
   const ledgerData = useMemo(() => {
     const sorted = [...txns].sort((a, b) => {
-      const parseTxnDate = (dateStr: string) => {
-        const parts = dateStr.split(' ');
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-        const day = parseInt(parts[0], 10);
-        const month = months.indexOf(parts[1]);
-        const year = parseInt(parts[2], 10);
-        return new Date(year, month, day);
-      };
-      return parseTxnDate(a.date).getTime() - parseTxnDate(b.date).getTime();
+      return parseDateString(a.date).getTime() - parseDateString(b.date).getTime();
     });
 
     let balance = 0;

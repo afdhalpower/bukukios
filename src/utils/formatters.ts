@@ -1,5 +1,15 @@
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
+export { MONTHS };
+
+export function parseDateString(dateStr: string): Date {
+  const parts = dateStr.split(' ');
+  const day = parseInt(parts[0], 10);
+  const month = MONTHS.indexOf(parts[1]);
+  const year = parseInt(parts[2], 10);
+  return new Date(year, month, day);
+}
+
 export function formatDateInput(date: Date): string {
   const d = date.getDate().toString().padStart(2, '0');
   const m = (date.getMonth() + 1).toString().padStart(2, '0');
