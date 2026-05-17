@@ -71,7 +71,7 @@ export default function TambahTransaksiScreen() {
 
     if (isEditing && params.editId) {
       await cancelNotificationByTransactionId(params.editId);
-      await editTransaction(params.editId, { amount, description, date: formatDate(date) });
+      await editTransaction(params.editId, { amount, description, date: formatDate(date), type: txType, customerId: selectedCustomerId });
       if (txType === 'utang' && dueDate) {
         const customer = customers.find((c) => c.id === selectedCustomerId);
         if (customer) {

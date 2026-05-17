@@ -142,7 +142,7 @@ export function formatDueDate(dueDateStr?: string): string {
 
 export async function updateTransaction(
   transactionId: string,
-  updates: Partial<Pick<Transaction, 'amount' | 'description' | 'date' | 'dueDate'>>,
+  updates: Partial<Pick<Transaction, 'amount' | 'description' | 'date' | 'dueDate' | 'type' | 'customerId'>>,
 ): Promise<void> {
   const transactions = await getTransactions();
   const idx = transactions.findIndex((t) => t.id === transactionId);
@@ -150,23 +150,55 @@ export async function updateTransaction(
 
   const oldTx = transactions[idx];
   const oldAmount = oldTx.amount;
+  const oldType = oldTx.type;
+  const oldCustomerId = oldTx.customerId;
 
-  Object.assign(transactions[idx], updates);
+  const newType = updates.type ?? oldType;
+  const newCustomerId = updates.customerId ?? oldCustomerId;
+  const newAmount = updates.amount ?? oldAmount;
+
+  Object.assign(transactions[idx], { ...updates, type: newType, customerId: newCustomerId });
 
   await AsyncStorage.setItem(KEYS.transactions, JSON.stringify(transactions));
 
-  const customer = await getCustomer(oldTx.customerId);
-  if (customer) {
-    const newAmount = updates.amount ?? oldAmount;
-    const amountDiff = newAmount - oldAmount;
-    if (oldTx.type === 'utang') {
-      customer.totalDebt += amountDiff;
+  // Revert old transaction effect on old customer
+  const oldCustomer = await getCustomer(oldCustomerId);
+  if (oldCustomer) {
+    if (oldType === 'utang') {
+      oldCustomer.totalDebt -= oldAmount;
     } else {
-      customer.totalDebt -= amountDiff;
+      oldCustomer.totalDebt += oldAmount;
     }
-    if (customer.totalDebt < 0) customer.totalDebt = 0;
-    customer.status = customer.totalDebt > 0 ? 'aktif' : 'lunas';
-    await saveCustomer(customer);
+    if (oldCustomer.totalDebt < 0) oldCustomer.totalDebt = 0;
+    oldCustomer.status = oldCustomer.totalDebt > 0 ? 'aktif' : 'lunas';
+    await saveCustomer(oldCustomer);
+  }
+
+  // Apply new transaction effect on new customer
+  if (newCustomerId !== oldCustomerId) {
+    const newCustomer = await getCustomer(newCustomerId);
+    if (newCustomer) {
+      if (newType === 'utang') {
+        newCustomer.totalDebt += newAmount;
+      } else {
+        newCustomer.totalDebt -= newAmount;
+      }
+      if (newCustomer.totalDebt < 0) newCustomer.totalDebt = 0;
+      newCustomer.status = newCustomer.totalDebt > 0 ? 'aktif' : 'lunas';
+      await saveCustomer(newCustomer);
+    }
+  } else {
+    const customer = oldCustomer;
+    if (customer) {
+      if (newType === 'utang') {
+        customer.totalDebt += newAmount;
+      } else {
+        customer.totalDebt -= newAmount;
+      }
+      if (customer.totalDebt < 0) customer.totalDebt = 0;
+      customer.status = customer.totalDebt > 0 ? 'aktif' : 'lunas';
+      await saveCustomer(customer);
+    }
   }
 }
 
