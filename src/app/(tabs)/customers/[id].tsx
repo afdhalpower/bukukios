@@ -199,7 +199,7 @@ export default function CustomerDetailScreen() {
                   Pelanggan sejak {customer.since}
                 </Text>
                 <View style={styles.badges}>
-                  <StatusChip label="Aktif" variant="lunas" />
+                  <StatusChip label={customer.status === 'lunas' ? 'Lunas' : 'Aktif'} variant={customer.status === 'lunas' ? 'lunas' : 'utang'} />
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryLabel}>{customer.category}</Text>
                   </View>

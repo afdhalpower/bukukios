@@ -95,7 +95,7 @@ export default function EditPelangganScreen() {
             const ok = await deleteCustomer(customer.id);
             if (ok) {
               Alert.alert('Berhasil', 'Pelanggan berhasil dihapus.', [
-                { text: 'OK', onPress: () => router.dismiss(2) },
+                { text: 'OK', onPress: () => router.replace('/(tabs)/customers') },
               ]);
             } else {
               Alert.alert('Gagal', 'Tidak bisa menghapus pelanggan.');

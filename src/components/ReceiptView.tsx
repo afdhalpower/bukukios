@@ -21,8 +21,8 @@ export default function ReceiptView({ transaction, customer }: ReceiptViewProps)
 
   async function handleSaveImage() {
     try {
-      const text = generateReceiptText();
-      await Share.share({ message: text, title: 'Invoice' });
+      const text = `INVOICE ${transaction.invoice}\n${transaction.description}\n${formatRupiah(transaction.amount)}\n${transaction.date}`;
+      await Share.share({ message: text, title: 'Invoice - BukuKios' });
     } catch {
       Alert.alert('Gagal', 'Tidak bisa menyimpan invoice.');
     }

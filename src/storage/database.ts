@@ -151,7 +151,6 @@ export async function updateTransaction(
   const oldTx = transactions[idx];
   const oldAmount = oldTx.amount;
 
-  if (updates.amount !== undefined) updates.amount = updates.amount;
   Object.assign(transactions[idx], updates);
 
   await AsyncStorage.setItem(KEYS.transactions, JSON.stringify(transactions));
