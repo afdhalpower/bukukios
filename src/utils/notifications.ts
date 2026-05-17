@@ -88,3 +88,55 @@ export async function getScheduledNotifications() {
   if (isWeb) return [];
   return await Notifications.getAllScheduledNotificationsAsync();
 }
+
+export async function rescheduleAllReminders(
+  transactions: { id: string; customerName: string; amount: number; dueDate: string }[],
+): Promise<void> {
+  if (isWeb) return;
+  const granted = await requestNotificationPermission();
+  if (!granted) return;
+
+  await Notifications.cancelAllScheduledNotificationsAsync();
+
+  const now = new Date();
+  for (const tx of transactions) {
+    const dueDate = new Date(tx.dueDate);
+    if (dueDate <= now) continue;
+
+    const threeDaysBefore = new Date(dueDate);
+    threeDaysBefore.setDate(threeDaysBefore.getDate() - 3);
+
+    const onDueDate = new Date(dueDate);
+    onDueDate.setHours(9, 0, 0, 0);
+
+    const amountFormatted = tx.amount.toLocaleString('id-ID');
+
+    if (threeDaysBefore > now) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Pengingat Jatuh Tempo',
+          body: `Utang ${tx.customerName} sebesar Rp ${amountFormatted} jatuh tempo dalam 3 hari lagi.`,
+          data: { transactionId: tx.id, type: 'due_date_reminder' },
+          sound: true,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: threeDaysBefore,
+        },
+      });
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Jatuh Tempo Hari Ini!',
+        body: `Utang ${tx.customerName} sebesar Rp ${amountFormatted} jatuh tempo hari ini. Segera tagih.`,
+        data: { transactionId: tx.id, type: 'due_date_today' },
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: onDueDate,
+      },
+    });
+  }
+}

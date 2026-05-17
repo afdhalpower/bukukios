@@ -69,10 +69,11 @@ export function useAddTransaction() {
     description: string,
     date: Date,
     dueDate?: Date,
-  ) => {
+  ): Promise<string> => {
     setSaving(true);
-    await saveTransaction(customerId, type, amount, description, date, dueDate);
+    const id = await saveTransaction(customerId, type, amount, description, date, dueDate);
     setSaving(false);
+    return id;
   };
 
   return { add, saving };

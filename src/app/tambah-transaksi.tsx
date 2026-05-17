@@ -84,17 +84,12 @@ export default function TambahTransaksiScreen() {
       return;
     }
 
-    await add(selectedCustomerId, txType, amount, description, date, dueDate);
+    const savedId = await add(selectedCustomerId, txType, amount, description, date, dueDate);
 
-    if (txType === 'utang' && dueDate) {
+    if (txType === 'utang' && dueDate && savedId) {
       const customer = customers.find((c) => c.id === selectedCustomerId);
       if (customer) {
-        await scheduleDueDateReminder(
-          selectedCustomerId + '-' + Date.now(),
-          customer.name,
-          amount,
-          dueDate,
-        );
+        await scheduleDueDateReminder(savedId, customer.name, amount, dueDate);
       }
     }
 

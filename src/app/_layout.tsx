@@ -14,10 +14,10 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useColors, useTheme } from '@/context/ThemeContext';
 import { DrawerProvider } from '@/context/DrawerContext';
-import { initializeDatabase } from '@/storage/database';
+import { initializeDatabase, getDueTransactions, getCustomerName } from '@/storage/database';
 import SplashOverlay from '@/components/SplashOverlay';
 import SideMenu from '@/components/SideMenu';
-import { requestNotificationPermission } from '@/utils/notifications';
+import { requestNotificationPermission, rescheduleAllReminders } from '@/utils/notifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -68,6 +68,24 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) {
       SplashScreen.hideAsync();
+      (async () => {
+        const granted = await requestNotificationPermission();
+        if (granted) {
+          const dueTxns = await getDueTransactions();
+          const reminders = await Promise.all(
+            dueTxns.map(async (tx) => {
+              const name = await getCustomerName(tx.customerId);
+              return name
+                ? { id: tx.id, customerName: name, amount: tx.amount, dueDate: tx.dueDate! }
+                : null;
+            }),
+          );
+          const filtered = reminders.filter((r): r is NonNullable<typeof r> => r !== null);
+          if (filtered.length > 0) {
+            await rescheduleAllReminders(filtered);
+          }
+        }
+      })();
     }
   }, [ready]);
 

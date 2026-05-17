@@ -102,10 +102,11 @@ export async function saveTransaction(
   description: string,
   date: Date,
   dueDate?: Date,
-): Promise<void> {
+): Promise<string> {
   const transactions = await getTransactions();
+  const id = generateId();
   const newTx: Transaction = {
-    id: generateId(),
+    id,
     customerId,
     type,
     amount,
@@ -126,6 +127,18 @@ export async function saveTransaction(
     customer.status = customer.totalDebt > 0 ? 'aktif' : 'lunas';
     await saveCustomer(customer);
   }
+
+  return id;
+}
+
+export async function getDueTransactions(): Promise<Transaction[]> {
+  const all = await getTransactions();
+  return all.filter((t) => t.type === 'utang' && t.dueDate);
+}
+
+export async function getCustomerName(id: string): Promise<string | null> {
+  const customer = await getCustomer(id);
+  return customer?.name ?? null;
 }
 
 export async function clearAllData(): Promise<void> {
