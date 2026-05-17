@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking, Platform, Alert, Modal, TextInput } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
 import ActionSheet from '@/components/ActionSheet';
@@ -9,55 +10,17 @@ import { useTheme } from '@/context/ThemeContext';
 import { useDrawer } from '@/context/DrawerContext';
 import { clearAllData, getCustomers, getTransactions, getProfile, saveProfile } from '@/storage/database';
 import type { Profile } from '@/storage/database';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { exportCSV, exportTextReport, backupJSON, importFromJSON } from '@/utils/export';
 import { requestNotificationPermission, cancelAllNotifications, getScheduledNotifications } from '@/utils/notifications';
 import MaterialIcon from '@/components/MaterialIcon';
 import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 
-interface SettingItemProps {
-  icon: string;
-  title: string;
-  subtitle?: string;
-  onPress?: () => void;
-  rightElement?: React.ReactNode;
-  danger?: boolean;
-}
 
-function SettingItem({ icon, title, subtitle, onPress, rightElement, danger }: SettingItemProps) {
-  const iconColor = danger ? colors.error : colors.onSurfaceVariant;
-  const titleColor = danger ? colors.error : colors.onSurface;
-
-  return (
-    <Pressable
-      style={styles.settingItem}
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityLabel={title}
-    >
-      <View style={[styles.iconCircle, { backgroundColor: danger ? colors.error + '15' : colors.primary + '15' }]}>
-        <MaterialIcon name={icon} color={iconColor} size={22} />
-      </View>
-      <View style={styles.settingText}>
-        <Text style={[styles.settingTitle, { color: titleColor }]}>{title}</Text>
-        {subtitle && <Text style={[styles.settingSubtitle, { color: colors.onSurfaceVariant }]}>{subtitle}</Text>}
-      </View>
-      {rightElement}
-      {!rightElement && onPress && (
-        <MaterialIcon name="chevron-right" color={colors.onSurfaceVariant} size={20} />
-      )}
-    </Pressable>
-  );
-}
-
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <Text style={[styles.sectionHeader, { color: colors.primary }]}>{title}</Text>
-  );
-}
 
 export default function SettingsScreen() {
+  const colors = useColors();
   const { theme, toggleTheme } = useTheme();
   const { openDrawer } = useDrawer();
   const router = useRouter();
@@ -91,6 +54,127 @@ export default function SettingsScreen() {
   const [showNotifAlert, setShowNotifAlert] = useState(false);
   const [showResetResult, setShowResetResult] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+
+  function SettingItem({ icon, title, subtitle, onPress, rightElement, danger }: {
+    icon: string;
+    title: string;
+    subtitle?: string;
+    onPress?: () => void;
+    rightElement?: React.ReactNode;
+    danger?: boolean;
+  }) {
+    const iconColor = danger ? colors.error : colors.onSurfaceVariant;
+    const titleColor = danger ? colors.error : colors.onSurface;
+
+    return (
+      <Pressable
+        style={styles.settingItem}
+        onPress={onPress}
+        disabled={!onPress}
+        accessibilityLabel={title}
+      >
+        <View style={[styles.iconCircle, { backgroundColor: danger ? colors.error + '15' : colors.primary + '15' }]}>
+          <MaterialIcon name={icon} color={iconColor} size={22} />
+        </View>
+        <View style={styles.settingText}>
+          <Text style={[styles.settingTitle, { color: titleColor }]}>{title}</Text>
+          {subtitle && <Text style={[styles.settingSubtitle, { color: colors.onSurfaceVariant }]}>{subtitle}</Text>}
+        </View>
+        {rightElement}
+        {!rightElement && onPress && (
+          <MaterialIcon name="chevron-right" color={colors.onSurfaceVariant} size={20} />
+        )}
+      </Pressable>
+    );
+  }
+
+  function SectionHeader({ title }: { title: string }) {
+    return (
+      <Text style={[styles.sectionHeader, { color: colors.primary }]}>{title}</Text>
+    );
+  }
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: spacing.containerPadding, height: 64,
+      backgroundColor: colors.surface + 'CC',
+      borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
+      shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
+    },
+    scrollView: { flex: 1 },
+    profileSection: {
+      alignItems: 'center', paddingVertical: spacing.stackLg,
+      backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
+    },
+    profileName: { ...typography.headlineMd, marginTop: spacing.stackSm },
+    profileEmail: { ...typography.bodyMd, marginTop: 2 },
+    sectionHeader: {
+      ...typography.labelSm, fontWeight: '600', textTransform: 'uppercase',
+      letterSpacing: 0.8, paddingHorizontal: spacing.containerPadding,
+      paddingTop: spacing.stackMd, paddingBottom: spacing.stackSm,
+    },
+    card: {
+      marginHorizontal: spacing.containerPadding,
+      borderRadius: borderRadius.lg,
+      overflow: 'hidden',
+    },
+    settingItem: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: spacing.stackMd, paddingVertical: spacing.stackMd,
+    },
+    iconCircle: {
+      width: 40, height: 40, borderRadius: 20,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    settingText: { flex: 1, marginLeft: spacing.stackSm },
+    settingTitle: { ...typography.bodyMd, fontWeight: '600' },
+    settingSubtitle: { ...typography.bodyMd, marginTop: 2 },
+    divider: { height: 1, marginHorizontal: spacing.stackMd },
+    footer: {
+      alignItems: 'center', paddingVertical: spacing.stackLg, gap: spacing.stackSm,
+    },
+    footerText: { ...typography.bodyMd },
+    restoreContainer: {
+      flex: 1, backgroundColor: colors.background, padding: spacing.containerPadding,
+    },
+    restoreHeader: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.stackMd,
+    },
+    restoreTitle: {
+      ...typography.headlineLg, color: colors.onSurface,
+    },
+    restoreInfo: {
+      ...typography.bodyMd, color: colors.onSurfaceVariant, marginBottom: spacing.stackMd,
+    },
+    restoreInput: {
+      flex: 1, borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
+      padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
+      backgroundColor: colors.surfaceContainerLowest, textAlignVertical: 'top',
+    },
+    restoreButton: {
+      backgroundColor: colors.error, paddingVertical: spacing.stackMd, borderRadius: borderRadius.xl,
+      alignItems: 'center', marginTop: spacing.stackMd,
+    },
+    restoreButtonLabel: {
+      ...typography.headlineMd, color: colors.onPrimary,
+    },
+    editProfileButton: {
+      flexDirection: 'row', alignItems: 'center', gap: spacing.base,
+      marginTop: spacing.stackSm, paddingVertical: spacing.base, paddingHorizontal: spacing.stackMd,
+      borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.outlineVariant,
+    },
+    editProfileLabel: {
+      ...typography.labelBold, color: colors.primary,
+    },
+    profileInput: {
+      borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
+      padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
+      backgroundColor: colors.surfaceContainerLowest,
+    },
+  }), [colors]);
 
   const handleToggleNotifications = async (value: boolean) => {
     if (value) {
@@ -375,84 +459,4 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: spacing.containerPadding, height: 64,
-    backgroundColor: colors.surface + 'CC',
-    borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
-    shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
-  },
-  scrollView: { flex: 1 },
-  profileSection: {
-    alignItems: 'center', paddingVertical: spacing.stackLg,
-    backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
-  },
-  profileName: { ...typography.headlineMd, marginTop: spacing.stackSm },
-  profileEmail: { ...typography.bodyMd, marginTop: 2 },
-  sectionHeader: {
-    ...typography.labelSm, fontWeight: '600', textTransform: 'uppercase',
-    letterSpacing: 0.8, paddingHorizontal: spacing.containerPadding,
-    paddingTop: spacing.stackMd, paddingBottom: spacing.stackSm,
-  },
-  card: {
-    marginHorizontal: spacing.containerPadding,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-  },
-  settingItem: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: spacing.stackMd, paddingVertical: spacing.stackMd,
-  },
-  iconCircle: {
-    width: 40, height: 40, borderRadius: 20,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  settingText: { flex: 1, marginLeft: spacing.stackSm },
-  settingTitle: { ...typography.bodyMd, fontWeight: '600' },
-  settingSubtitle: { ...typography.bodyMd, marginTop: 2 },
-  divider: { height: 1, marginHorizontal: spacing.stackMd },
-  footer: {
-    alignItems: 'center', paddingVertical: spacing.stackLg, gap: spacing.stackSm,
-  },
-  footerText: { ...typography.bodyMd },
-  restoreContainer: {
-    flex: 1, backgroundColor: colors.background, padding: spacing.containerPadding,
-  },
-  restoreHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.stackMd,
-  },
-  restoreTitle: {
-    ...typography.headlineLg, color: colors.onSurface,
-  },
-  restoreInfo: {
-    ...typography.bodyMd, color: colors.onSurfaceVariant, marginBottom: spacing.stackMd,
-  },
-  restoreInput: {
-    flex: 1, borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
-    padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLowest, textAlignVertical: 'top',
-  },
-  restoreButton: {
-    backgroundColor: colors.error, paddingVertical: spacing.stackMd, borderRadius: borderRadius.xl,
-    alignItems: 'center', marginTop: spacing.stackMd,
-  },
-  restoreButtonLabel: {
-    ...typography.headlineMd, color: colors.onPrimary,
-  },
-  editProfileButton: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.base,
-    marginTop: spacing.stackSm, paddingVertical: spacing.base, paddingHorizontal: spacing.stackMd,
-    borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.outlineVariant,
-  },
-  editProfileLabel: {
-    ...typography.labelBold, color: colors.primary,
-  },
-  profileInput: {
-    borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
-    padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLowest,
-  },
-});
+

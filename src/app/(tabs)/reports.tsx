@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
 import SummaryCard from '@/components/SummaryCard';
@@ -7,7 +8,7 @@ import TrendChart from '@/components/TrendChart';
 import { useDrawer } from '@/context/DrawerContext';
 import { useCustomers } from '@/storage/hooks';
 import { getTransactions } from '@/storage/database';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Transaction } from '@/types';
 import { formatRupiah } from '@/utils/formatters';
@@ -25,6 +26,7 @@ const MONTH_ORDER: Record<string, number> = {
 };
 
 export default function ReportsScreen() {
+  const colors = useColors();
   const { openDrawer } = useDrawer();
   const { customers } = useCustomers();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -59,6 +61,43 @@ export default function ReportsScreen() {
   const sortedMonths = Object.entries(monthlyMap)
     .sort(([a], [b]) => (MONTH_ORDER[a] || 0) - (MONTH_ORDER[b] || 0));
   const chartData = sortedMonths.map(([label, value]) => ({ label, value }));
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: spacing.containerPadding, height: 64,
+      backgroundColor: colors.surface + 'CC',
+      borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
+      shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
+    },
+    headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.stackMd },
+    brand: { ...typography.headlineLg, color: colors.primary, fontWeight: '700' },
+    content: { padding: spacing.containerPadding, gap: spacing.stackLg, paddingBottom: 40 },
+    pageTitle: { ...typography.displayLg, color: colors.onSurface },
+    summaryGrid: { gap: spacing.gutter },
+    card: {
+      backgroundColor: colors.surfaceContainerLowest, borderWidth: 1, borderColor: colors.outlineVariant,
+      borderRadius: borderRadius.xl, padding: spacing.stackLg,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    },
+    cardTitle: { ...typography.headlineMd, color: colors.onSurface, marginBottom: spacing.stackMd },
+    rankList: { gap: spacing.stackSm },
+    rankItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.stackMd },
+    rankBadge: {
+      width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surfaceContainerHigh,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    rankNumber: { ...typography.labelBold, color: colors.onSurfaceVariant },
+    rankInfo: { flex: 1 },
+    rankName: { ...typography.headlineMd, color: colors.onSurface },
+    rankCategory: { ...typography.labelSm, color: colors.onSurfaceVariant },
+    rankAmount: { ...typography.headlineMd, color: colors.error },
+    emptyState: { alignItems: 'center', paddingVertical: 80, gap: spacing.stackMd },
+    emptyTitle: { ...typography.headlineMd, color: colors.onSurfaceVariant },
+    emptySubtitle: { ...typography.bodyMd, color: colors.outline, textAlign: 'center' },
+  }), [colors]);
 
   return (
     <ScrollView style={styles.container}>
@@ -120,41 +159,5 @@ export default function ReportsScreen() {
       </View>
     </ScrollView>
   );
-}
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: spacing.containerPadding, height: 64,
-    backgroundColor: colors.surface + 'CC',
-    borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '4D',
-    shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.stackMd },
-  brand: { ...typography.headlineLg, color: colors.primary, fontWeight: '700' },
-  content: { padding: spacing.containerPadding, gap: spacing.stackLg, paddingBottom: 40 },
-  pageTitle: { ...typography.displayLg, color: colors.onSurface },
-  summaryGrid: { gap: spacing.gutter },
-  card: {
-    backgroundColor: colors.surfaceContainerLowest, borderWidth: 1, borderColor: colors.outlineVariant,
-    borderRadius: borderRadius.xl, padding: spacing.stackLg,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
-  },
-  cardTitle: { ...typography.headlineMd, color: colors.onSurface, marginBottom: spacing.stackMd },
-  rankList: { gap: spacing.stackSm },
-  rankItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.stackMd },
-  rankBadge: {
-    width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surfaceContainerHigh,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  rankNumber: { ...typography.labelBold, color: colors.onSurfaceVariant },
-  rankInfo: { flex: 1 },
-  rankName: { ...typography.headlineMd, color: colors.onSurface },
-  rankCategory: { ...typography.labelSm, color: colors.onSurfaceVariant },
-  rankAmount: { ...typography.headlineMd, color: colors.error },
-  emptyState: { alignItems: 'center', paddingVertical: 80, gap: spacing.stackMd },
-  emptyTitle: { ...typography.headlineMd, color: colors.onSurfaceVariant },
-  emptySubtitle: { ...typography.bodyMd, color: colors.outline, textAlign: 'center' },
-});
+}

@@ -1,6 +1,7 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { colors } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 
 const AVATAR_PALETTE = [
   '#0e4c5e', '#2c694e', '#8b122c', '#104d5f', '#316e52',
@@ -30,6 +31,23 @@ export default function Avatar({
   textColor = '#ffffff',
   source,
 }: AvatarProps) {
+  const colors = useColors();
+  const styles = useMemo(() => StyleSheet.create({
+    image: {
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+    },
+    fallback: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+    },
+    initials: {
+      fontWeight: '700',
+    },
+  }), [colors]);
+
   if (source) {
     return (
       <Animated.View entering={ZoomIn.springify().duration(400)}>
@@ -69,18 +87,4 @@ export default function Avatar({
   );
 }
 
-const styles = StyleSheet.create({
-  image: {
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  fallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  initials: {
-    fontWeight: '700',
-  },
-});
+

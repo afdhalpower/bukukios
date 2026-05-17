@@ -1,9 +1,10 @@
 import { TextInput, Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
 import { timingConfig } from '@/constants/animations';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useColors } from '@/context/ThemeContext';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -16,7 +17,37 @@ export default function SearchBar({
   value,
   onChangeText,
 }: SearchBarProps) {
+  const colors = useColors();
   const [isFocused, setIsFocused] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceContainerLowest,
+      borderRadius: borderRadius.xl,
+      height: 48,
+      paddingHorizontal: spacing.stackMd,
+    },
+    icon: {
+      position: 'absolute',
+      left: spacing.stackMd,
+    },
+    input: {
+      ...typography.bodyMd,
+      color: colors.onSurface,
+      flex: 1,
+      marginLeft: 28,
+      height: '100%',
+    },
+    clearButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }), [colors]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     borderColor: withTiming(isFocused ? colors.primary : colors.outlineVariant, timingConfig),
@@ -53,31 +84,4 @@ export default function SearchBar({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.xl,
-    height: 48,
-    paddingHorizontal: spacing.stackMd,
-  },
-  icon: {
-    position: 'absolute',
-    left: spacing.stackMd,
-  },
-  input: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-    flex: 1,
-    marginLeft: 28,
-    height: '100%',
-  },
-  clearButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+

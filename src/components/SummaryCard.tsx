@@ -1,8 +1,10 @@
 import { Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import GradientCard from './GradientCard';
+import { useColors } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 
 interface SummaryCardProps {
   title: string;
@@ -23,6 +25,78 @@ export default function SummaryCard({
   subtitle,
   large,
 }: SummaryCardProps) {
+  const colors = useColors();
+  const styles = useMemo(() => StyleSheet.create({
+    gradientCard: {
+      minHeight: 200,
+      justifyContent: 'space-between',
+    },
+    gradientLabel: {
+      ...typography.labelSm,
+      color: '#ffffffCC',
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    gradientAmount: {
+      ...typography.displayLg,
+      color: '#ffffff',
+      marginTop: spacing.base,
+      fontSize: 36,
+      lineHeight: 44,
+    },
+    trendBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.base,
+      backgroundColor: '#ffffff1A',
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 9999,
+      alignSelf: 'flex-start',
+      marginTop: spacing.stackSm,
+    },
+    trendBadgeText: {
+      ...typography.labelSm,
+      color: '#ffffffCC',
+    },
+    card: {
+      backgroundColor: colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderRadius: borderRadius.xl,
+      padding: spacing.stackLg,
+      justifyContent: 'center',
+      minHeight: 120,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    label: {
+      ...typography.labelSm,
+      color: colors.outline,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+      flex: 1,
+    },
+    amount: {
+      ...typography.headlineLg,
+      color: colors.primary,
+      marginTop: spacing.stackSm,
+    },
+    subtitle: {
+      ...typography.labelSm,
+      color: colors.onSurfaceVariant,
+      marginTop: spacing.base,
+    },
+    iconRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.stackSm,
+    },
+  }), [colors]);
+
   if (large) {
     return (
       <GradientCard
@@ -55,73 +129,4 @@ export default function SummaryCard({
   );
 }
 
-const styles = StyleSheet.create({
-  gradientCard: {
-    minHeight: 200,
-    justifyContent: 'space-between',
-  },
-  gradientLabel: {
-    ...typography.labelSm,
-    color: '#ffffffCC',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  gradientAmount: {
-    ...typography.displayLg,
-    color: '#ffffff',
-    marginTop: spacing.base,
-    fontSize: 36,
-    lineHeight: 44,
-  },
-  trendBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.base,
-    backgroundColor: '#ffffff1A',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 9999,
-    alignSelf: 'flex-start',
-    marginTop: spacing.stackSm,
-  },
-  trendBadgeText: {
-    ...typography.labelSm,
-    color: '#ffffffCC',
-  },
-  card: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: borderRadius.xl,
-    padding: spacing.stackLg,
-    justifyContent: 'center',
-    minHeight: 120,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  label: {
-    ...typography.labelSm,
-    color: colors.outline,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    flex: 1,
-  },
-  amount: {
-    ...typography.headlineLg,
-    color: colors.primary,
-    marginTop: spacing.stackSm,
-  },
-  subtitle: {
-    ...typography.labelSm,
-    color: colors.onSurfaceVariant,
-    marginTop: spacing.base,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.stackSm,
-  },
-});
+

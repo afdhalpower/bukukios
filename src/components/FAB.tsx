@@ -2,8 +2,8 @@ import { Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { colors } from '@/constants/theme';
-import { useEffect } from 'react';
+import { useColors } from '@/context/ThemeContext';
+import { useEffect, useMemo } from 'react';
 
 interface FABProps {
   icon?: keyof typeof MaterialIcons.glyphMap;
@@ -12,6 +12,7 @@ interface FABProps {
 }
 
 export default function FAB({ icon = 'add', onPress, isOpen = false }: FABProps) {
+  const colors = useColors();
   const scale = useSharedValue(1);
   const rotation = useSharedValue(0);
   const pulse = useSharedValue(1);
@@ -30,6 +31,31 @@ export default function FAB({ icon = 'add', onPress, isOpen = false }: FABProps)
       { rotate: `${rotation.value}deg` },
     ],
   }));
+
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      position: 'absolute',
+      bottom: 80,
+      right: 20,
+      zIndex: 50,
+    },
+    fab: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      elevation: 8,
+      overflow: 'hidden',
+    },
+    icon: {
+      zIndex: 2,
+    },
+  }), [colors]);
 
   return (
     <Pressable
@@ -54,27 +80,4 @@ export default function FAB({ icon = 'add', onPress, isOpen = false }: FABProps)
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    zIndex: 50,
-  },
-  fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
-    overflow: 'hidden',
-  },
-  icon: {
-    zIndex: 2,
-  },
-});
+

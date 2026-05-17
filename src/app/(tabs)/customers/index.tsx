@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography } from '@/constants/theme';
+import { spacing, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 import CustomerCard from '@/components/CustomerCard';
 import SearchBar from '@/components/SearchBar';
 import Avatar from '@/components/Avatar';
@@ -13,6 +14,7 @@ import { DEFAULT_AVATAR_URL } from '@/constants/theme';
 import { useCustomers } from '@/storage/hooks';
 
 export default function CustomerListScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { openDrawer } = useDrawer();
   const { customers, loading, refresh } = useCustomers();
@@ -22,6 +24,78 @@ export default function CustomerListScreen() {
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
   );
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.containerPadding,
+      height: 64,
+      backgroundColor: colors.surface + 'CC',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.outlineVariant + '4D',
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.stackMd,
+    },
+    brand: {
+      ...typography.headlineLg,
+      color: colors.primary,
+      fontWeight: '700',
+    },
+    scroll: {
+      flex: 1,
+    },
+    content: {
+      padding: spacing.containerPadding,
+      gap: spacing.stackMd,
+      maxWidth: 800,
+      width: '100%',
+      alignSelf: 'center',
+      paddingBottom: 100,
+    },
+    titleSection: {
+      gap: spacing.base,
+    },
+    title: {
+      ...typography.headlineMd,
+      color: colors.onSurface,
+    },
+    subtitle: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+    },
+    list: {
+      gap: spacing.stackSm,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 60,
+      gap: spacing.stackMd,
+    },
+    emptyTitle: {
+      ...typography.headlineMd,
+      color: colors.onSurfaceVariant,
+    },
+    emptySubtitle: {
+      ...typography.bodyMd,
+      color: colors.outline,
+      textAlign: 'center',
+      paddingHorizontal: spacing.containerPadding,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -77,75 +151,3 @@ export default function CustomerListScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.containerPadding,
-    height: 64,
-    backgroundColor: colors.surface + 'CC',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant + '4D',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.stackMd,
-  },
-  brand: {
-    ...typography.headlineLg,
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.containerPadding,
-    gap: spacing.stackMd,
-    maxWidth: 800,
-    width: '100%',
-    alignSelf: 'center',
-    paddingBottom: 100,
-  },
-  titleSection: {
-    gap: spacing.base,
-  },
-  title: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
-  },
-  subtitle: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-  },
-  list: {
-    gap: spacing.stackSm,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    gap: spacing.stackMd,
-  },
-  emptyTitle: {
-    ...typography.headlineMd,
-    color: colors.onSurfaceVariant,
-  },
-  emptySubtitle: {
-    ...typography.bodyMd,
-    color: colors.outline,
-    textAlign: 'center',
-    paddingHorizontal: spacing.containerPadding,
-  },
-});

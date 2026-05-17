@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { colors, ColorTokens } from '@/constants/theme';
+import { colors as lightColors, ColorTokens } from '@/constants/theme';
 import { darkColors } from '@/constants/themeDark';
 
 type Theme = 'light' | 'dark';
@@ -14,17 +14,14 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleTheme: () => {},
 });
 
-function applyColors(source: typeof colors) {
-  (Object.keys(source) as (keyof ColorTokens)[]).forEach((key) => {
-    colors[key] = source[key];
-  });
-}
+const ColorsContext = createContext<ColorTokens>(lightColors);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
+  const [currentColors, setCurrentColors] = useState<ColorTokens>(lightColors);
 
   useEffect(() => {
-    applyColors(theme === 'dark' ? darkColors : lightThemeColors);
+    setCurrentColors(theme === 'dark' ? darkColors : lightColors);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
@@ -33,7 +30,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      <ColorsContext.Provider value={currentColors}>
+        {children}
+      </ColorsContext.Provider>
     </ThemeContext.Provider>
   );
 }
@@ -42,6 +41,6 @@ export function useTheme(): ThemeContextType {
   return useContext(ThemeContext);
 }
 
-const lightThemeColors = Object.fromEntries(
-  Object.keys(darkColors).map((k) => [k, (colors as any)[k]])
-) as typeof colors;
+export function useColors(): ColorTokens {
+  return useContext(ColorsContext);
+}

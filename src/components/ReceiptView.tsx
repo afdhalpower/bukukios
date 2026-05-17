@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, Pressable, Share, Alert } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
 import { formatRupiah } from '@/utils/formatters';
+import { useColors } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 import { formatDueDate, isOverdue, daysUntilDue } from '@/storage/database';
 import type { Transaction, Customer } from '@/types';
 
@@ -11,6 +13,146 @@ interface ReceiptViewProps {
 }
 
 export default function ReceiptView({ transaction, customer, onClose }: ReceiptViewProps) {
+  const colors = useColors();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: spacing.containerPadding,
+    },
+    receipt: {
+      backgroundColor: colors.surfaceContainerLowest,
+      borderRadius: borderRadius.xl,
+      padding: spacing.stackLg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: spacing.stackMd,
+    },
+    logoText: {
+      ...typography.headlineLg,
+      color: colors.primary,
+      fontWeight: '800',
+    },
+    invoiceNumber: {
+      ...typography.labelBold,
+      color: colors.onSurfaceVariant,
+      marginTop: spacing.base,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.outlineVariant,
+      marginVertical: spacing.stackMd,
+    },
+    section: {
+      gap: spacing.stackSm,
+      marginBottom: spacing.stackMd,
+    },
+    sectionLabel: {
+      ...typography.labelBold,
+      color: colors.onSurfaceVariant,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      paddingVertical: spacing.base,
+    },
+    label: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      flex: 1,
+    },
+    value: {
+      ...typography.bodyMd,
+      color: colors.onSurface,
+      textAlign: 'right',
+      flex: 1,
+    },
+    subValue: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      marginTop: 2,
+    },
+    amount: {
+      ...typography.headlineMd,
+      fontWeight: '700',
+    },
+    statusSection: {
+      alignItems: 'center',
+      marginTop: spacing.stackMd,
+    },
+    statusBadge: {
+      paddingHorizontal: spacing.stackMd,
+      paddingVertical: spacing.base,
+      borderRadius: borderRadius.full,
+    },
+    statusText: {
+      ...typography.labelBold,
+    },
+    footer: {
+      alignItems: 'center',
+      marginTop: spacing.stackLg,
+      paddingTop: spacing.stackMd,
+      borderTopWidth: 1,
+      borderTopColor: colors.outlineVariant,
+    },
+    footerText: {
+      ...typography.labelBold,
+      color: colors.onSurfaceVariant,
+    },
+    footerSub: {
+      ...typography.labelSm,
+      color: colors.outline,
+      marginTop: 2,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: spacing.stackMd,
+      marginTop: spacing.stackMd,
+    },
+    actionButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.stackSm,
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.stackMd,
+      borderRadius: borderRadius.xl,
+    },
+    actionLabel: {
+      ...typography.labelBold,
+      color: colors.onPrimary,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: -8,
+      right: -8,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.surfaceContainer,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10,
+    },
+    closeIcon: {
+      fontSize: 22,
+      color: colors.onSurfaceVariant,
+      lineHeight: 24,
+    },
+  }), [colors]);
+
   async function handleShare() {
     try {
       const text = generateReceiptText();
@@ -138,141 +280,4 @@ function MaterialIcon({ name, color, size }: { name: any; color: string; size: n
   return <MaterialIcons name={name} size={size} color={color} />;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing.containerPadding,
-  },
-  receipt: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.xl,
-    padding: spacing.stackLg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.stackMd,
-  },
-  logoText: {
-    ...typography.headlineLg,
-    color: colors.primary,
-    fontWeight: '800',
-  },
-  invoiceNumber: {
-    ...typography.labelBold,
-    color: colors.onSurfaceVariant,
-    marginTop: spacing.base,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.outlineVariant,
-    marginVertical: spacing.stackMd,
-  },
-  section: {
-    gap: spacing.stackSm,
-    marginBottom: spacing.stackMd,
-  },
-  sectionLabel: {
-    ...typography.labelBold,
-    color: colors.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: spacing.base,
-  },
-  label: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    flex: 1,
-  },
-  value: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-    textAlign: 'right',
-    flex: 1,
-  },
-  subValue: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    marginTop: 2,
-  },
-  amount: {
-    ...typography.headlineMd,
-    fontWeight: '700',
-  },
-  statusSection: {
-    alignItems: 'center',
-    marginTop: spacing.stackMd,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.stackMd,
-    paddingVertical: spacing.base,
-    borderRadius: borderRadius.full,
-  },
-  statusText: {
-    ...typography.labelBold,
-  },
-  footer: {
-    alignItems: 'center',
-    marginTop: spacing.stackLg,
-    paddingTop: spacing.stackMd,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
-  },
-  footerText: {
-    ...typography.labelBold,
-    color: colors.onSurfaceVariant,
-  },
-  footerSub: {
-    ...typography.labelSm,
-    color: colors.outline,
-    marginTop: 2,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: spacing.stackMd,
-    marginTop: spacing.stackMd,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.stackSm,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.stackMd,
-    borderRadius: borderRadius.xl,
-  },
-  actionLabel: {
-    ...typography.labelBold,
-    color: colors.onPrimary,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.surfaceContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
-  closeIcon: {
-    fontSize: 22,
-    color: colors.onSurfaceVariant,
-    lineHeight: 24,
-  },
-});
+

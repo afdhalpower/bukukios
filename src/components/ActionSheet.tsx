@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 
 export interface ActionSheetAction {
   text: string;
@@ -19,14 +20,15 @@ interface ActionSheetProps {
   onClose: () => void;
 }
 
-function getActionColor(style?: 'default' | 'cancel' | 'destructive') {
-  if (style === 'destructive') return colors.error;
-  if (style === 'cancel') return colors.onSurfaceVariant;
-  return colors.onSurface;
-}
-
 export default function ActionSheet({ visible, title, message, actions, onClose }: ActionSheetProps) {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
+
+  function getActionColor(style?: 'default' | 'cancel' | 'destructive') {
+    if (style === 'destructive') return colors.error;
+    if (style === 'cancel') return colors.onSurfaceVariant;
+    return colors.onSurface;
+  }
   const slideAnim = useRef(new Animated.Value(0)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -41,6 +43,83 @@ export default function ActionSheet({ visible, title, message, actions, onClose 
       backdropAnim.setValue(0);
     }
   }, [visible, slideAnim, backdropAnim]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: '#000',
+    },
+    sheet: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderTopLeftRadius: borderRadius.xl,
+      borderTopRightRadius: borderRadius.xl,
+      paddingTop: spacing.stackSm,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 10,
+    },
+    header: {
+      alignItems: 'center',
+      paddingVertical: spacing.stackMd,
+      paddingHorizontal: spacing.stackMd,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.outlineVariant + '4D',
+      gap: spacing.base,
+    },
+    title: {
+      ...typography.headlineMd,
+      color: colors.onSurface,
+    },
+    message: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      textAlign: 'center',
+    },
+    actionsContainer: {
+      paddingVertical: spacing.stackSm,
+      gap: spacing.base,
+    },
+    actionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.stackMd,
+      paddingVertical: spacing.stackMd,
+      gap: spacing.stackMd,
+      marginHorizontal: spacing.stackSm,
+      borderRadius: borderRadius.lg,
+    },
+    actionItemPressed: {
+      backgroundColor: colors.primary + '12',
+    },
+    actionText: {
+      ...typography.bodyLg,
+    },
+    cancelGap: {
+      height: spacing.stackSm,
+    },
+    cancelContainer: {
+      paddingBottom: spacing.stackSm,
+    },
+    cancelItem: {
+      alignItems: 'center',
+      paddingVertical: spacing.stackMd,
+      marginHorizontal: spacing.stackSm,
+      borderRadius: borderRadius.lg,
+      backgroundColor: colors.surface,
+    },
+    cancelText: {
+      ...typography.bodyLg,
+      color: colors.onSurfaceVariant,
+      fontFamily: 'HankenGrotesk_700Bold',
+      fontWeight: '700',
+    },
+  }), [colors]);
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
@@ -141,79 +220,4 @@ export default function ActionSheet({ visible, title, message, actions, onClose 
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000',
-  },
-  sheet: {
-    backgroundColor: colors.surfaceContainerHigh,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingTop: spacing.stackSm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  header: {
-    alignItems: 'center',
-    paddingVertical: spacing.stackMd,
-    paddingHorizontal: spacing.stackMd,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant + '4D',
-    gap: spacing.base,
-  },
-  title: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
-  },
-  message: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    textAlign: 'center',
-  },
-  actionsContainer: {
-    paddingVertical: spacing.stackSm,
-    gap: spacing.base,
-  },
-  actionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.stackMd,
-    paddingVertical: spacing.stackMd,
-    gap: spacing.stackMd,
-    marginHorizontal: spacing.stackSm,
-    borderRadius: borderRadius.lg,
-  },
-  actionItemPressed: {
-    backgroundColor: colors.primary + '12',
-  },
-  actionText: {
-    ...typography.bodyLg,
-  },
-  cancelGap: {
-    height: spacing.stackSm,
-  },
-  cancelContainer: {
-    paddingBottom: spacing.stackSm,
-  },
-  cancelItem: {
-    alignItems: 'center',
-    paddingVertical: spacing.stackMd,
-    marginHorizontal: spacing.stackSm,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-  },
-  cancelText: {
-    ...typography.bodyLg,
-    color: colors.onSurfaceVariant,
-    fontFamily: 'HankenGrotesk_700Bold',
-    fontWeight: '700',
-  },
-});
+

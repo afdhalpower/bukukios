@@ -1,8 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, borderRadius, spacing } from '@/constants/theme';
+import { borderRadius, spacing } from '@/constants/theme';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useColors } from '@/context/ThemeContext';
 
 interface GradientCardProps {
   gradientColors: readonly [string, string, ...string[]];
@@ -12,6 +13,25 @@ interface GradientCardProps {
 }
 
 export default function GradientCard({ gradientColors, children, style }: GradientCardProps) {
+  const colors = useColors();
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      borderRadius: borderRadius.xl,
+      overflow: 'hidden',
+      minHeight: 120,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 6,
+    },
+    content: {
+      padding: spacing.stackLg,
+      justifyContent: 'center',
+      flex: 1,
+    },
+  }), [colors]);
+
   return (
     <Animated.View entering={FadeIn.duration(400).springify()} style={[styles.card, style]}>
       <LinearGradient
@@ -27,20 +47,4 @@ export default function GradientCard({ gradientColors, children, style }: Gradie
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: borderRadius.xl,
-    overflow: 'hidden',
-    minHeight: 120,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  content: {
-    padding: spacing.stackLg,
-    justifyContent: 'center',
-    flex: 1,
-  },
-});
+

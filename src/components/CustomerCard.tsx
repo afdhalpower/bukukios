@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeInDown } from 'react-native-reanimated';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
 import { springConfig } from '@/constants/animations';
+import { useColors } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 import Avatar from './Avatar';
 import StatusChip from './StatusChip';
 import { formatRupiah } from '@/utils/formatters';
@@ -26,6 +28,7 @@ export default function CustomerCard({
   onPress,
   index = 0,
 }: CustomerCardProps) {
+  const colors = useColors();
   const scale = useSharedValue(1);
   const hasDebt = amount > 0;
 
@@ -40,6 +43,46 @@ export default function CustomerCard({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderRadius: borderRadius.xl,
+      padding: spacing.stackMd,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.stackMd,
+      flex: 1,
+    },
+    right: {
+      alignItems: 'flex-end',
+      gap: spacing.base,
+    },
+    name: {
+      ...typography.headlineMd,
+      color: colors.onSurface,
+    },
+    phone: {
+      ...typography.labelSm,
+      color: colors.onSurfaceVariant,
+    },
+    amount: {
+      ...typography.headlineMd,
+      color: colors.tertiary,
+    },
+  }), [colors]);
 
   return (
     <GestureDetector gesture={tap}>
@@ -62,42 +105,4 @@ export default function CustomerCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: borderRadius.xl,
-    padding: spacing.stackMd,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.stackMd,
-    flex: 1,
-  },
-  right: {
-    alignItems: 'flex-end',
-    gap: spacing.base,
-  },
-  name: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
-  },
-  phone: {
-    ...typography.labelSm,
-    color: colors.onSurfaceVariant,
-  },
-  amount: {
-    ...typography.headlineMd,
-    color: colors.tertiary,
-  },
-});
+

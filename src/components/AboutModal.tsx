@@ -1,28 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, Animated, ScrollView } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
 import BukuKiosLogo from './BukuKiosLogo';
+import { useColors } from '@/context/ThemeContext';
 
 interface AboutModalProps {
   visible: boolean;
   onClose: () => void;
-}
-
-interface InfoRowProps {
-  icon: string;
-  label: string;
-  value: string;
-}
-
-function InfoRow({ icon, label, value }: InfoRowProps) {
-  return (
-    <View style={styles.infoRow}>
-      <MaterialIcons name={icon as any} size={20} color={colors.onSurfaceVariant} />
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
 }
 
 const techStack = [
@@ -35,7 +20,18 @@ const techStack = [
 ];
 
 export default function AboutModal({ visible, onClose }: AboutModalProps) {
+  const colors = useColors();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+    return (
+      <View style={styles.infoRow}>
+        <MaterialIcons name={icon as any} size={20} color={colors.onSurfaceVariant} />
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{value}</Text>
+      </View>
+    );
+  }
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
@@ -49,6 +45,128 @@ export default function AboutModal({ visible, onClose }: AboutModalProps) {
       scaleAnim.setValue(0.9);
     }
   }, [visible, fadeAnim, scaleAnim]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.stackLg,
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modal: {
+      width: '100%',
+      maxWidth: 400,
+      maxHeight: '85%',
+      backgroundColor: colors.surface,
+      borderRadius: borderRadius.xl,
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.2,
+      shadowRadius: 24,
+      elevation: 20,
+    },
+    scrollContent: {
+      padding: spacing.stackLg,
+      alignItems: 'center',
+      gap: spacing.stackMd,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: spacing.stackMd,
+      right: spacing.stackMd,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primary + '10',
+      zIndex: 1,
+    },
+    logoSection: {
+      alignItems: 'center',
+      gap: spacing.stackSm,
+      paddingTop: spacing.stackLg,
+    },
+    appName: {
+      ...typography.headlineLg,
+      color: colors.primary,
+    },
+    tagline: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+    },
+    divider: {
+      width: '100%',
+      height: 1,
+      backgroundColor: colors.outlineVariant + '4D',
+      marginVertical: spacing.stackSm,
+    },
+    infoSection: {
+      width: '100%',
+      gap: spacing.stackMd,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.stackSm,
+    },
+    infoLabel: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      width: 80,
+    },
+    infoValue: {
+      ...typography.bodyMd,
+      color: colors.onSurface,
+      fontFamily: 'HankenGrotesk_600SemiBold',
+      fontWeight: '600',
+      flex: 1,
+      textAlign: 'right',
+    },
+    techTitle: {
+      ...typography.labelBold,
+      color: colors.onSurfaceVariant,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      alignSelf: 'flex-start',
+    },
+    chipContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.stackSm,
+    },
+    chip: {
+      paddingHorizontal: spacing.stackMd,
+      paddingVertical: spacing.stackSm - 2,
+      borderRadius: borderRadius.full,
+      backgroundColor: colors.primary + '12',
+      borderWidth: 1,
+      borderColor: colors.primary + '20',
+    },
+    chipText: {
+      ...typography.labelSm,
+      color: colors.primary,
+      fontFamily: 'HankenGrotesk_600SemiBold',
+      fontWeight: '600',
+    },
+    tutupButton: {
+      width: '100%',
+      alignItems: 'center',
+      paddingVertical: spacing.stackMd,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.lg,
+      marginTop: spacing.stackSm,
+    },
+    tutupText: {
+      ...typography.labelLg,
+      color: colors.onPrimary,
+    },
+  }), [colors]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -105,124 +223,4 @@ export default function AboutModal({ visible, onClose }: AboutModalProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.stackLg,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modal: {
-    width: '100%',
-    maxWidth: 400,
-    maxHeight: '85%',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 20,
-  },
-  scrollContent: {
-    padding: spacing.stackLg,
-    alignItems: 'center',
-    gap: spacing.stackMd,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: spacing.stackMd,
-    right: spacing.stackMd,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary + '10',
-    zIndex: 1,
-  },
-  logoSection: {
-    alignItems: 'center',
-    gap: spacing.stackSm,
-    paddingTop: spacing.stackLg,
-  },
-  appName: {
-    ...typography.headlineLg,
-    color: colors.primary,
-  },
-  tagline: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-  },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: colors.outlineVariant + '4D',
-    marginVertical: spacing.stackSm,
-  },
-  infoSection: {
-    width: '100%',
-    gap: spacing.stackMd,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.stackSm,
-  },
-  infoLabel: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    width: 80,
-  },
-  infoValue: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-    fontFamily: 'HankenGrotesk_600SemiBold',
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'right',
-  },
-  techTitle: {
-    ...typography.labelBold,
-    color: colors.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    alignSelf: 'flex-start',
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.stackSm,
-  },
-  chip: {
-    paddingHorizontal: spacing.stackMd,
-    paddingVertical: spacing.stackSm - 2,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary + '12',
-    borderWidth: 1,
-    borderColor: colors.primary + '20',
-  },
-  chipText: {
-    ...typography.labelSm,
-    color: colors.primary,
-    fontFamily: 'HankenGrotesk_600SemiBold',
-    fontWeight: '600',
-  },
-  tutupButton: {
-    width: '100%',
-    alignItems: 'center',
-    paddingVertical: spacing.stackMd,
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
-    marginTop: spacing.stackSm,
-  },
-  tutupText: {
-    ...typography.labelLg,
-    color: colors.onPrimary,
-  },
-});
+

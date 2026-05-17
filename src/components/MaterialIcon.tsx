@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 
 interface MaterialIconProps {
   name: string;
@@ -8,6 +8,8 @@ interface MaterialIconProps {
   style?: any;
 }
 
-export default function MaterialIcon({ name, color = colors.onSurface, size = 24, style }: MaterialIconProps) {
+export default function MaterialIcon({ name, color: propColor, size = 24, style }: MaterialIconProps) {
+  const colors = useColors();
+  const color = propColor ?? colors.onSurface;
   return <MaterialIcons name={name as any} size={size} color={color} style={style} />;
 }

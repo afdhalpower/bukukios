@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 
 interface BarItem {
   label: string;
@@ -8,7 +10,46 @@ interface BarItem {
 }
 
 export default function TrendChart({ data, maxValue: max }: { data: BarItem[]; maxValue?: number }) {
+  const colors = useColors();
   const maxVal = max ?? Math.max(...data.map((d) => d.value), 1);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'flex-end',
+      height: 200,
+      paddingTop: spacing.stackMd,
+    },
+    barColumn: {
+      alignItems: 'center',
+      flex: 1,
+      gap: spacing.base,
+      height: '100%',
+      justifyContent: 'flex-end',
+    },
+    barValue: {
+      ...typography.labelSm,
+      color: colors.onSurfaceVariant,
+    },
+    barTrack: {
+      width: 32,
+      height: 120,
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: borderRadius.lg,
+      overflow: 'hidden',
+      justifyContent: 'flex-end',
+    },
+    barFill: {
+      width: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.lg,
+    },
+    barLabel: {
+      ...typography.labelSm,
+      color: colors.onSurfaceVariant,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -37,40 +78,4 @@ function formatCompact(n: number): string {
   return n.toString();
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-    height: 200,
-    paddingTop: spacing.stackMd,
-  },
-  barColumn: {
-    alignItems: 'center',
-    flex: 1,
-    gap: spacing.base,
-    height: '100%',
-    justifyContent: 'flex-end',
-  },
-  barValue: {
-    ...typography.labelSm,
-    color: colors.onSurfaceVariant,
-  },
-  barTrack: {
-    width: 32,
-    height: 120,
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
-  },
-  barFill: {
-    width: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
-  },
-  barLabel: {
-    ...typography.labelSm,
-    color: colors.onSurfaceVariant,
-  },
-});
+

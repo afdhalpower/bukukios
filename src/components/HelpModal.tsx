@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, Animated, ScrollView, LayoutAnimation, Platform, UIManager } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { spacing, borderRadius, typography } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -16,33 +17,6 @@ interface FaqItemProps {
   question: string;
   answer: string;
   defaultOpen?: boolean;
-}
-
-function FaqItem({ question, answer, defaultOpen }: FaqItemProps) {
-  const [open, setOpen] = useState(defaultOpen || false);
-
-  const toggle = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setOpen(!open);
-  };
-
-  return (
-    <View style={styles.faqItem}>
-      <Pressable style={styles.faqHeader} onPress={toggle}>
-        <Text style={styles.faqQuestion}>{question}</Text>
-        <MaterialIcons
-          name={open ? 'expand-less' : 'expand-more'}
-          size={20}
-          color={colors.onSurfaceVariant}
-        />
-      </Pressable>
-      {open && (
-        <View style={styles.faqAnswer}>
-          <Text style={styles.faqAnswerText}>{answer}</Text>
-        </View>
-      )}
-    </View>
-  );
 }
 
 const faqs: FaqItemProps[] = [
@@ -77,7 +51,35 @@ const faqs: FaqItemProps[] = [
 ];
 
 export default function HelpModal({ visible, onClose }: HelpModalProps) {
+  const colors = useColors();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  function FaqItem({ question, answer, defaultOpen }: FaqItemProps) {
+    const [open, setOpen] = useState(defaultOpen || false);
+
+    const toggle = () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setOpen(!open);
+    };
+
+    return (
+      <View style={styles.faqItem}>
+        <Pressable style={styles.faqHeader} onPress={toggle}>
+          <Text style={styles.faqQuestion}>{question}</Text>
+          <MaterialIcons
+            name={open ? 'expand-less' : 'expand-more'}
+            size={20}
+            color={colors.onSurfaceVariant}
+          />
+        </Pressable>
+        {open && (
+          <View style={styles.faqAnswer}>
+            <Text style={styles.faqAnswerText}>{answer}</Text>
+          </View>
+        )}
+      </View>
+    );
+  }
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
@@ -91,6 +93,110 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
       scaleAnim.setValue(0.9);
     }
   }, [visible, fadeAnim, scaleAnim]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.stackLg,
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modal: {
+      width: '100%',
+      maxWidth: 400,
+      maxHeight: '85%',
+      backgroundColor: colors.surface,
+      borderRadius: borderRadius.xl,
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.2,
+      shadowRadius: 24,
+      elevation: 20,
+    },
+    scrollContent: {
+      padding: spacing.stackLg,
+      gap: spacing.stackMd,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: spacing.stackMd,
+      right: spacing.stackMd,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primary + '10',
+      zIndex: 1,
+    },
+    headerSection: {
+      alignItems: 'center',
+      gap: spacing.stackSm,
+      paddingTop: spacing.stackLg,
+    },
+    headerTitle: {
+      ...typography.headlineLg,
+      color: colors.primary,
+    },
+    headerSubtitle: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      textAlign: 'center',
+    },
+    divider: {
+      width: '100%',
+      height: 1,
+      backgroundColor: colors.outlineVariant + '4D',
+      marginVertical: spacing.stackSm,
+    },
+    faqItem: {
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderRadius: borderRadius.lg,
+      overflow: 'hidden',
+    },
+    faqHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: spacing.stackMd,
+      backgroundColor: colors.surfaceContainerLowest,
+    },
+    faqQuestion: {
+      ...typography.bodyMd,
+      color: colors.onSurface,
+      fontWeight: '600',
+      flex: 1,
+      marginRight: spacing.stackSm,
+    },
+    faqAnswer: {
+      padding: spacing.stackMd,
+      paddingTop: 0,
+      backgroundColor: colors.surfaceContainerLowest,
+    },
+    faqAnswerText: {
+      ...typography.bodyMd,
+      color: colors.onSurfaceVariant,
+      lineHeight: 22,
+    },
+    tutupButton: {
+      width: '100%',
+      alignItems: 'center',
+      paddingVertical: spacing.stackMd,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.lg,
+      marginTop: spacing.stackSm,
+    },
+    tutupText: {
+      ...typography.labelLg,
+      color: colors.onPrimary,
+    },
+  }), [colors]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -133,106 +239,4 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.stackLg,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modal: {
-    width: '100%',
-    maxWidth: 400,
-    maxHeight: '85%',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 20,
-  },
-  scrollContent: {
-    padding: spacing.stackLg,
-    gap: spacing.stackMd,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: spacing.stackMd,
-    right: spacing.stackMd,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary + '10',
-    zIndex: 1,
-  },
-  headerSection: {
-    alignItems: 'center',
-    gap: spacing.stackSm,
-    paddingTop: spacing.stackLg,
-  },
-  headerTitle: {
-    ...typography.headlineLg,
-    color: colors.primary,
-  },
-  headerSubtitle: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    textAlign: 'center',
-  },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: colors.outlineVariant + '4D',
-    marginVertical: spacing.stackSm,
-  },
-  faqItem: {
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-  },
-  faqHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.stackMd,
-    backgroundColor: colors.surfaceContainerLowest,
-  },
-  faqQuestion: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-    fontWeight: '600',
-    flex: 1,
-    marginRight: spacing.stackSm,
-  },
-  faqAnswer: {
-    padding: spacing.stackMd,
-    paddingTop: 0,
-    backgroundColor: colors.surfaceContainerLowest,
-  },
-  faqAnswerText: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    lineHeight: 22,
-  },
-  tutupButton: {
-    width: '100%',
-    alignItems: 'center',
-    paddingVertical: spacing.stackMd,
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
-    marginTop: spacing.stackSm,
-  },
-  tutupText: {
-    ...typography.labelLg,
-    color: colors.onPrimary,
-  },
-});
+
