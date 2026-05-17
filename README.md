@@ -17,11 +17,13 @@ Aplikasi pencatatan keuangan UMKM berbasis React Native (Expo) untuk mengelola p
 ### Manajemen Transaksi
 - Catat utang baru dengan invoice otomatis
 - Catat pembayaran (bayar)
-- Edit dan hapus transaksi
+- Edit transaksi — bisa ubah jumlah, deskripsi, tanggal, tipe (utang↔bayar), bahkan pindah pelanggan
+- Hapus transaksi — otomatis sesuaikan saldo pelanggan
 - Field **jatuh tempo** (opsional) untuk utang
 - Badge **OVERDUE** pada transaksi yang melewati jatuh tempo
 - Filter transaksi: berdasarkan jenis (utang/bayar) dan rentang waktu
 - Pagination riwayat transaksi — tombol "Tampilkan Lebih Banyak"
+- Notifikasi jatuh tempo otomatis dibatalkan saat transaksi diedit/dihapus
 
 ### Dashboard & Laporan
 - Ringkasan total piutang dan jumlah pelanggan perlu ditagih
@@ -34,13 +36,15 @@ Aplikasi pencatatan keuangan UMKM berbasis React Native (Expo) untuk mengelola p
 - Kolom: Tanggal, Keterangan, Debit (utang), Kredit (bayar), Saldo
 
 ### Invoice & Receipt
-- Preview invoice untuk setiap transaksi utang
-- Bagikan invoice via Share API
+- Preview invoice dalam bentuk modal untuk setiap transaksi
+- Bagikan atau simpan invoice via Share API
+- Tombol **Struk** dari menu konteks transaksi
 
 ### Data & Backup
 - Export data ke **CSV** (semua transaksi)
 - Export **Laporan** ringkasan (pelanggan + transaksi)
 - Backup data ke **JSON**
+- **Restore** dari file backup JSON (paste langsung di app)
 - Reset data ke data awal (seed)
 
 ### Notifikasi
@@ -53,9 +57,13 @@ Aplikasi pencatatan keuangan UMKM berbasis React Native (Expo) untuk mengelola p
 - **ActionSheet** — bottom sheet interaktif (filter, kelola data, reset, konfirmasi)
 - **About modal** — info aplikasi dengan versi, developer, tech stack
 - **Help modal** — FAQ interaktif dengan panduan penggunaan aplikasi
-- Link rating otomatis: Play Store (Android) / App Store (iOS)
+- Link rating: Play Store (Android) / App Store (iOS)
 - Animasi halus dengan Reanimated
 - Palet teal-navy + forest green
+
+### Profil & Pengaturan
+- Edit nama toko dan email dari halaman Settings
+- Profil tersimpan otomatis, tidak hardcode
 
 ## Tech Stack
 
@@ -95,7 +103,6 @@ bukukios/
 │   │   ├── HelpModal.tsx            # FAQ & panduan
 │   ├── constants/                    # Theme, animations
 │   ├── context/                      # ThemeContext, DrawerContext
-│   ├── data/                         # Seed data
 │   ├── hooks/                        # Data hooks (useCustomers, etc.)
 │   ├── storage/
 │   │   ├── database.ts               # AsyncStorage CRUD layer
@@ -138,7 +145,7 @@ npm start
 ## Arsitektur Data
 
 - **Single data source**: `src/storage/database.ts` — semua operasi CRUD melalui AsyncStorage
-- **Keys**: `@bukukios/customers`, `@bukukios/transactions`, `@bukukios/initialized`
+- **Keys**: `@bukukios/customers`, `@bukukios/transactions`, `@bukukios/initialized`, `@bukukios/profile`
 - **Seed data**: Ditulis saat pertama kali run (dicek via `@bukukios/initialized`)
 - **Atomic update**: `saveTransaction()` update transaksi + `totalDebt` customer sekaligus
 - **Auto status**: `totalDebt > 0` -> `'aktif'`, `totalDebt === 0` -> `'lunas'`
