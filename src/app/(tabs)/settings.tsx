@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Share, Linking, Platform, Alert, Modal, TextInput } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import Avatar from '@/components/Avatar';
 import BukuKiosLogo from '@/components/BukuKiosLogo';
@@ -10,7 +10,7 @@ import { useDrawer } from '@/context/DrawerContext';
 import { clearAllData, getCustomers, getTransactions } from '@/storage/database';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { exportCSV, exportTextReport, backupJSON } from '@/utils/export';
+import { exportCSV, exportTextReport, backupJSON, importFromJSON } from '@/utils/export';
 import { requestNotificationPermission, cancelAllNotifications, getScheduledNotifications } from '@/utils/notifications';
 import MaterialIcon from '@/components/MaterialIcon';
 import { DEFAULT_AVATAR_URL } from '@/constants/theme';
@@ -65,6 +65,9 @@ export default function SettingsScreen() {
   const [showKelola, setShowKelola] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showRestore, setShowRestore] = useState(false);
+  const [restoreJson, setRestoreJson] = useState('');
+  const [isRestoring, setIsRestoring] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -217,6 +220,7 @@ export default function SettingsScreen() {
             try { const json = await backupJSON(); await Share.share({ message: json, title: 'bukukios-backup.json' }); }
             catch { setShowNotifAlert(true); }
           }},
+          { text: 'Restore JSON', icon: 'cloud-upload', onPress: () => { setShowKelola(false); setTimeout(() => setShowRestore(true), 300); }},
           { text: 'Batal', style: 'cancel' },
         ]}
         onClose={() => setShowKelola(false)}
@@ -265,6 +269,49 @@ export default function SettingsScreen() {
         visible={showHelp}
         onClose={() => setShowHelp(false)}
       />
+
+      <Modal visible={showRestore} animationType="slide" transparent={false} onRequestClose={() => setShowRestore(false)}>
+        <View style={styles.restoreContainer}>
+          <View style={styles.restoreHeader}>
+            <Text style={styles.restoreTitle}>Restore Data</Text>
+            <Pressable onPress={() => setShowRestore(false)}>
+              <MaterialIcon name="close" color={colors.onSurfaceVariant} size={24} />
+            </Pressable>
+          </View>
+          <Text style={styles.restoreInfo}>
+            Paste konten file backup JSON di bawah ini. Data yang ada saat ini akan ditimpa.
+          </Text>
+          <TextInput
+            style={styles.restoreInput}
+            multiline
+            placeholder="Paste JSON backup di sini..."
+            placeholderTextColor={colors.outline}
+            value={restoreJson}
+            onChangeText={setRestoreJson}
+          />
+          <Pressable
+            style={[styles.restoreButton, isRestoring && { opacity: 0.7 }]}
+            disabled={isRestoring}
+            onPress={async () => {
+              if (!restoreJson.trim()) { Alert.alert('Error', 'Harap paste konten backup'); return; }
+              setIsRestoring(true);
+              const result = await importFromJSON(restoreJson);
+              if (result.success) {
+                Alert.alert('Berhasil', result.message);
+                setShowRestore(false);
+                setRestoreJson('');
+              } else {
+                Alert.alert('Gagal', result.message);
+              }
+              setIsRestoring(false);
+            }}
+          >
+            <Text style={styles.restoreButtonLabel}>
+              {isRestoring ? 'Memulihkan...' : 'Restore Data'}
+            </Text>
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -312,4 +359,28 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingVertical: spacing.stackLg, gap: spacing.stackSm,
   },
   footerText: { ...typography.bodyMd },
+  restoreContainer: {
+    flex: 1, backgroundColor: colors.background, padding: spacing.containerPadding,
+  },
+  restoreHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.stackMd,
+  },
+  restoreTitle: {
+    ...typography.headlineLg, color: colors.onSurface,
+  },
+  restoreInfo: {
+    ...typography.bodyMd, color: colors.onSurfaceVariant, marginBottom: spacing.stackMd,
+  },
+  restoreInput: {
+    flex: 1, borderWidth: 1, borderColor: colors.outlineVariant, borderRadius: borderRadius.lg,
+    padding: spacing.stackMd, ...typography.bodyMd, color: colors.onSurface,
+    backgroundColor: colors.surfaceContainerLowest, textAlignVertical: 'top',
+  },
+  restoreButton: {
+    backgroundColor: colors.error, paddingVertical: spacing.stackMd, borderRadius: borderRadius.xl,
+    alignItems: 'center', marginTop: spacing.stackMd,
+  },
+  restoreButtonLabel: {
+    ...typography.headlineMd, color: colors.onPrimary,
+  },
 });

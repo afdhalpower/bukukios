@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCustomers, getTransactions } from '@/storage/database';
 import { formatRupiah } from '@/utils/formatters';
 
@@ -79,4 +80,19 @@ export async function backupJSON(): Promise<string> {
   };
 
   return JSON.stringify(backup, null, 2);
+}
+
+export async function importFromJSON(jsonStr: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (!data.version || !Array.isArray(data.customers) || !Array.isArray(data.transactions)) {
+      return { success: false, message: 'Format backup tidak valid' };
+    }
+    await AsyncStorage.setItem('@bukukios/customers', JSON.stringify(data.customers));
+    await AsyncStorage.setItem('@bukukios/transactions', JSON.stringify(data.transactions));
+    await AsyncStorage.setItem('@bukukios/initialized', 'true');
+    return { success: true, message: 'Data berhasil dipulihkan' };
+  } catch {
+    return { success: false, message: 'File backup rusak atau tidak valid' };
+  }
 }
