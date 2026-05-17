@@ -12,9 +12,8 @@ import { useFonts } from 'expo-font';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { ThemeProvider, useColors, useTheme } from '@/context/ThemeContext';
 import { DrawerProvider } from '@/context/DrawerContext';
-import { colors } from '@/constants/theme';
 import { initializeDatabase } from '@/storage/database';
 import SplashOverlay from '@/components/SplashOverlay';
 import SideMenu from '@/components/SideMenu';
@@ -23,10 +22,12 @@ import { requestNotificationPermission } from '@/utils/notifications';
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
+  const colors = useColors();
+  const { theme } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack key={theme} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
           name="tambah-transaksi"
